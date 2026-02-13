@@ -1,0 +1,125 @@
+<div class="card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày đăng ký</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(u=> { %>
+                <tr style="<%= u.deletedAt ? 'opacity:0.5;background:#fef2f2;' : '' %>">
+                    <td>
+                        <%= u.id %>
+                    </td>
+                    <td><strong>
+                            <%= u.fullName %>
+                        </strong></td>
+                    <td>
+                        <%= u.email %>
+                    </td>
+                    <td>
+                        <%= u.phone || '—' %>
+                    </td>
+                    <td>
+                        <% if (u.role==='admin' ) { %>
+                            <span class="badge badge-error">Admin</span>
+                            <% } else if (u.role==='inventory_manager' ) { %>
+                                <span class="badge badge-warning">Quản lý kho</span>
+                                <% } else { %>
+                                    <span class="badge badge-info">Khách hàng</span>
+                                    <% } %>
+                    </td>
+                    <td>
+                        <% if (u.deletedAt) { %>
+                            <span class="badge badge-error">Đã xóa</span>
+                            <% } else if (!u.isActive) { %>
+                                <span class="badge badge-warning">Bị khóa</span>
+                                <% } else { %>
+                                    <span class="badge badge-success">Hoạt động</span>
+                                    <% } %>
+                    </td>
+                    <td>
+                        <%= formatDate(u.createdAt) %>
+                    </td>
+                    <td>
+                        <% if (u.id !==user.id) { %>
+                            <div style="display:flex;gap:0.25rem;flex-wrap:wrap;">
+                                <% if (u.deletedAt) { %>
+                                    <!-- Restore button for deleted users -->
+                                    <form action="/admin/users/<%= u.id %>/restore" method="POST"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-primary" title="Khôi phục">
+                                            <i class="fas fa-undo"></i> Khôi phục
+                                        </button>
+                                    </form>
+                                    <% } else { %>
+                                        <!-- Lock/Unlock button -->
+                                        <form action="/admin/users/<%= u.id %>/toggle-lock" method="POST"
+                                            style="display:inline;">
+                                            <% if (u.isActive) { %>
+                                                <button type="submit" class="btn btn-sm btn-warning"
+                                                    data-confirm="Bạn có chắc muốn khóa tài khoản này?"
+                                                    title="Khóa tài khoản">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                                <% } else { %>
+                                                    <button type="submit" class="btn btn-sm btn-success"
+                                                        title="Mở khóa tài khoản">
+                                                        <i class="fas fa-unlock"></i>
+                                                    </button>
+                                                    <% } %>
+                                        </form>
+                                        <!-- Delete button -->
+                                        <form action="/admin/users/<%= u.id %>/delete" method="POST"
+                                            style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                data-confirm="Bạn có chắc muốn xóa người dùng này?"
+                                                title="Xóa người dùng">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                        <% } %>
+                            </div>
+                            <% } else { %>
+                                <span style="color:#94a3b8;font-size:0.85rem;">Bạn</span>
+                                <% } %>
+                    </td>
+                </tr>
+                <% }); %>
+                    <% if (users.length===0) { %>
+                        <tr>
+                            <td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem;">Chưa có người dùng
+                            </td>
+                        </tr>
+                        <% } %>
+        </tbody>
+    </table>
+</div>
+
+<%- contentFor('style') %>
+    <style>
+        .btn-warning {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+    </style>

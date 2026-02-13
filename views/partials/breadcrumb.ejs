@@ -1,0 +1,15 @@
+<div class="breadcrumb">
+    <% path.forEach((item, index)=> { %>
+        <% if (index> 0) { %><span class="separator">/</span>
+            <% } %>
+                <% if (item.url) { %>
+                    <a href="<%= item.url %>">
+                        <%= item.name %>
+                    </a>
+                    <% } else { %>
+                        <span class="current">
+                            <%= item.name %>
+                        </span>
+                        <% } %>
+                            <% }); %>
+</div>

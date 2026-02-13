@@ -1,0 +1,274 @@
+<div class="confirmation-page">
+    <div class="container">
+        <div class="confirmation-box">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <h1>Đặt hàng thành công!</h1>
+            <p class="order-message">Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được tiếp nhận.</p>
+
+            <div class="order-number">
+                <span>Mã đơn hàng:</span>
+                <strong>
+                    <%= order.orderNumber %>
+                </strong>
+            </div>
+
+            <div class="order-details">
+                <div class="detail-section">
+                    <h3><i class="fas fa-user"></i> Thông tin khách hàng</h3>
+                    <p><strong>
+                            <%= order.customerName %>
+                        </strong></p>
+                    <p>
+                        <%= order.customerEmail %>
+                    </p>
+                    <p>
+                        <%= order.customerPhone %>
+                    </p>
+                </div>
+
+                <div class="detail-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Địa chỉ giao hàng</h3>
+                    <p>
+                        <%= order.shippingAddress %>
+                    </p>
+                    <p>
+                        <%= order.shippingWard %>, <%= order.shippingDistrict %>, <%= order.shippingProvince %>
+                    </p>
+                </div>
+
+                <div class="detail-section">
+                    <h3><i class="fas fa-box"></i> Chi tiết đơn hàng</h3>
+                    <div class="order-items">
+                        <% order.items.forEach(item=> { %>
+                            <div class="order-item">
+                                <span class="item-name">
+                                    <%= item.productName %>
+                                </span>
+                                <span class="item-qty">x<%= item.quantity %></span>
+                                <span class="item-price">
+                                    <%= formatCurrency(item.total) %>
+                                </span>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <hr>
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>Tạm tính:</span>
+                            <span>
+                                <%= formatCurrency(order.subtotal) %>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span>Phí vận chuyển:</span>
+                            <span>
+                                <%= formatCurrency(order.shippingFee) %>
+                            </span>
+                        </div>
+                        <div class="total-row final">
+                            <span>Tổng cộng:</span>
+                            <span>
+                                <%= formatCurrency(order.totalAmount) %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3><i class="fas fa-credit-card"></i> Thanh toán</h3>
+                    <p>
+                        <strong>Phương thức:</strong>
+                        <% if (order.paymentMethod==='cod' ) { %>
+                            Thanh toán khi nhận hàng (COD)
+                            <% } else if (order.paymentMethod==='vnpay' ) { %>
+                                VNPay
+                                <% } else if (order.paymentMethod==='bank_transfer' ) { %>
+                                    Chuyển khoản ngân hàng
+                                    <% } else { %>
+                                        Ví MoMo
+                                        <% } %>
+                    </p>
+                    <p>
+                        <strong>Trạng thái:</strong>
+                        <span class="status-badge status-<%= order.paymentStatus %>">
+                            <%= getPaymentStatusText(order.paymentStatus) %>
+                        </span>
+                    </p>
+
+                    <% if (order.paymentMethod==='bank_transfer' && bankTransferInfo) { %>
+                        <div class="bank-transfer-box">
+                            <div class="bank-transfer-header">
+                                <i class="fas fa-university"></i>
+                                <span>Thông tin chuyển khoản</span>
+                            </div>
+                            <div class="bank-transfer-content">
+                                <div class="bank-transfer-details">
+                                    <div class="transfer-row">
+                                        <span class="label">Ngân hàng:</span>
+                                        <span class="value">
+                                            <img src="<%= bankTransferInfo.bank.logo %>"
+                                                alt="<%= bankTransferInfo.bank.name %>"
+                                                style="height:20px;vertical-align:middle;margin-right:6px;"
+                                                onerror="this.style.display='none'">
+                                            <strong>
+                                                <%= bankTransferInfo.bank.name %>
+                                            </strong>
+                                        </span>
+                                    </div>
+                                    <div class="transfer-row">
+                                        <span class="label">Số tài khoản:</span>
+                                        <span class="value"><strong>
+                                                <%= bankTransferInfo.accountNumber %>
+                                            </strong></span>
+                                    </div>
+                                    <div class="transfer-row">
+                                        <span class="label">Chủ tài khoản:</span>
+                                        <span class="value"><strong>
+                                                <%= bankTransferInfo.accountName %>
+                                            </strong></span>
+                                    </div>
+                                    <div class="transfer-row">
+                                        <span class="label">Số tiền:</span>
+                                        <span class="value" style="color:#e53e3e;font-weight:700;font-size:1.1rem;">
+                                            <%= formatCurrency(bankTransferInfo.amount) %>
+                                        </span>
+                                    </div>
+                                    <div class="transfer-row">
+                                        <span class="label">Nội dung CK:</span>
+                                        <span class="value"><strong style="color:#2563eb;">
+                                                <%= bankTransferInfo.transferContent %>
+                                            </strong></span>
+                                    </div>
+                                </div>
+                                <div class="bank-transfer-qr">
+                                    <p style="font-size:0.85rem;color:#64748b;margin:0 0 0.5rem 0;text-align:center;">
+                                        Quét mã QR để chuyển khoản:</p>
+                                    <img src="<%= bankTransferInfo.qrCodeUrl %>" alt="QR Code chuyển khoản"
+                                        class="qr-code-img"
+                                        onerror="this.outerHTML='<p style=color:#94a3b8>Không tải được QR Code</p>'">
+                                </div>
+                            </div>
+                            <div class="bank-transfer-notice">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Vui lòng chuyển khoản trong vòng <strong>24 giờ</strong>. Đơn hàng sẽ được xử lý
+                                    sau khi chúng tôi xác nhận thanh toán.</span>
+                            </div>
+                        </div>
+                        <% } %>
+                </div>
+            </div>
+
+            <div class="confirmation-actions">
+                <a href="/" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+                <a href="/products" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm
+                </a>
+            </div>
+
+            <% if (isAuthenticated) { %>
+                <p class="track-order-note">
+                    <i class="fas fa-info-circle"></i>
+                    Bạn có thể theo dõi đơn hàng trong mục <a href="/orders">Lịch sử đơn hàng</a>
+                </p>
+                <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bank-transfer-box {
+        margin-top: 1rem;
+        border: 2px solid #22c55e;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .bank-transfer-header {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .bank-transfer-content {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
+        padding: 1.2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 600px) {
+        .bank-transfer-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .bank-transfer-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .transfer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .transfer-row:last-child {
+        border-bottom: none;
+    }
+
+    .transfer-row .label {
+        color: #64748b;
+        font-size: 0.9rem;
+        min-width: 110px;
+    }
+
+    .transfer-row .value {
+        text-align: right;
+        font-size: 0.95rem;
+    }
+
+    .bank-transfer-qr {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .qr-code-img {
+        width: 200px;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+    }
+
+    .bank-transfer-notice {
+        background: #fef3c7;
+        border-top: 1px solid #fbbf24;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #92400e;
+    }
+
+    .bank-transfer-notice i {
+        color: #f59e0b;
+        margin-top: 2px;
+    }
+</style>

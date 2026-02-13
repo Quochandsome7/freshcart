@@ -1,0 +1,90 @@
+<div class="card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Tồn kho hiện tại</th>
+                <th>Trạng thái</th>
+                <th>Cập nhật</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% products.forEach(product=> { %>
+                <tr>
+                    <td><code><%= product.sku %></code></td>
+                    <td><strong>
+                            <%= product.name %>
+                        </strong></td>
+                    <td>
+                        <%= product.category ? product.category.name : '—' %>
+                    </td>
+                    <td>
+                        <span id="stock-<%= product.id %>" style="font-size:1.1rem;font-weight:600;">
+                            <%= product.stock %>
+                        </span>
+                        <small>
+                            <%= product.unit %>
+                        </small>
+                    </td>
+                    <td>
+                        <% if (product.stock===0) { %>
+                            <span class="badge badge-error">Hết hàng</span>
+                            <% } else if (product.stock <=10) { %>
+                                <span class="badge badge-warning">Sắp hết</span>
+                                <% } else { %>
+                                    <span class="badge badge-success">Còn hàng</span>
+                                    <% } %>
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <input type="number" id="qty-<%= product.id %>" class="form-control" style="width:80px;"
+                                value="1" min="1">
+                            <button class="btn btn-sm btn-primary" onclick="updateStock(<%= product.id %>, 'add')">
+                                <i class="fas fa-plus"></i> Nhập
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="updateStock(<%= product.id %>, 'subtract')">
+                                <i class="fas fa-minus"></i> Xuất
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <% }); %>
+                    <% if (products.length===0) { %>
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Chưa có sản phẩm</td>
+                        </tr>
+                        <% } %>
+        </tbody>
+    </table>
+</div>
+
+<%- contentFor('script') %>
+    <script>
+        async function updateStock(productId, operation) {
+            const qtyInput = document.getElementById('qty-' + productId);
+            const quantity = parseInt(qtyInput.value);
+            if (!quantity || quantity < 1) {
+                alert('Vui lòng nhập số lượng hợp lệ');
+                return;
+            }
+            try {
+                const res = await fetch('/admin/inventory/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity, operation })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('stock-' + productId).textContent = data.newStock;
+                    qtyInput.value = 1;
+                    location.reload();
+                } else {
+                    alert(data.error || 'Có lỗi xảy ra');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối: ' + err.message);
+            }
+        }
+    </script>

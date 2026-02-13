@@ -1,0 +1,87 @@
+<div class="profile-page">
+    <div class="container">
+        <h1 class="page-title">Thông tin tài khoản</h1>
+
+        <div class="profile-layout">
+            <aside class="profile-sidebar">
+                <div class="user-card">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3>
+                        <%= profile.fullName %>
+                    </h3>
+                    <p>
+                        <%= profile.email %>
+                    </p>
+                </div>
+                <nav class="profile-nav">
+                    <a href="/profile" class="nav-item active">
+                        <i class="fas fa-user"></i> Thông tin cá nhân
+                    </a>
+                    <a href="/orders" class="nav-item">
+                        <i class="fas fa-box"></i> Đơn hàng của tôi
+                    </a>
+                    <a href="/logout" class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </nav>
+            </aside>
+
+            <div class="profile-content">
+                <form action="/profile" method="POST" class="profile-form">
+                    <h2>Thông tin cá nhân</h2>
+
+                    <div class="form-group">
+                        <label for="fullName">Họ và tên</label>
+                        <input type="text" id="fullName" name="fullName" value="<%= profile.fullName %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="<%= profile.email %>" disabled>
+                        <small>Email không thể thay đổi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" name="phone" value="<%= profile.phone || '' %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Địa chỉ</label>
+                        <textarea id="address" name="address" rows="2"><%= profile.address || '' %></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật thông tin
+                    </button>
+                </form>
+
+                <form action="/profile" method="POST" class="password-form">
+                    <h2>Đổi mật khẩu</h2>
+
+                    <div class="form-group">
+                        <label for="currentPassword">Mật khẩu hiện tại</label>
+                        <input type="password" id="currentPassword" name="currentPassword">
+                    </div>
+
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label for="newPassword">Mật khẩu mới</label>
+                            <input type="password" id="newPassword" name="newPassword" minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+                            <input type="password" id="confirmNewPassword">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-key"></i> Đổi mật khẩu
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

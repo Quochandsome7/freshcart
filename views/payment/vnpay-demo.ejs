@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNPay - Thanh toán Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #005baa 0%, #0066cc 50%, #1a7ae8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vnpay-container {
+            background: white;
+            border-radius: 20px;
+            width: 440px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .vnpay-header {
+            background: linear-gradient(135deg, #005baa, #0078d4);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .vnpay-header .logo {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .vnpay-header .logo i {
+            margin-right: 8px;
+        }
+
+        .vnpay-header .subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .vnpay-body {
+            padding: 28px 24px;
+        }
+
+        .order-info {
+            background: #eff6ff;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .order-info .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-info .label {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .order-info .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .order-info .amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: #005baa;
+            margin-top: 12px;
+        }
+
+        .payment-methods {
+            margin-bottom: 24px;
+        }
+
+        .payment-methods h4 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .method-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .method-item:hover {
+            border-color: #0078d4;
+            background: #eff6ff;
+        }
+
+        .method-item.selected {
+            border-color: #0078d4;
+            background: #eff6ff;
+        }
+
+        .method-item i {
+            font-size: 22px;
+            color: #0078d4;
+            width: 30px;
+            text-align: center;
+        }
+
+        .method-item .info {
+            flex: 1;
+        }
+
+        .method-item .info .name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        .method-item .info .desc {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .method-item .radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .method-item.selected .radio {
+            border-color: #0078d4;
+        }
+
+        .method-item.selected .radio::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 10px;
+            height: 10px;
+            background: #0078d4;
+            border-radius: 50%;
+        }
+
+        /* Card form */
+        .card-form {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .card-form.show {
+            display: block;
+        }
+
+        .card-form .form-group {
+            margin-bottom: 12px;
+        }
+
+        .card-form label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .card-form input,
+        .card-form select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .card-form input:focus,
+        .card-form select:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        .card-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .card-row .form-group {
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-pay {
+            background: linear-gradient(135deg, #005baa, #0078d4);
+            color: white;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 120, 212, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        /* Processing overlay */
+        .processing-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .processing-overlay.show {
+            display: flex;
+        }
+
+        .processing-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 350px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing-box h3 {
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .processing-box p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .success-icon i {
+            color: white;
+            font-size: 32px;
+        }
+
+        .footer-note {
+            text-align: center;
+            padding: 16px 24px;
+            background: #f9fafb;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .footer-note i {
+            color: #0078d4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="vnpay-container">
+        <div class="vnpay-header">
+            <div class="logo"><i class="fas fa-credit-card"></i> VNPAY</div>
+            <div class="subtitle">Cổng thanh toán VNPAY</div>
+            <div class="demo-badge"><i class="fas fa-flask"></i> CHẾ ĐỘ DEMO</div>
+        </div>
+        <div class="vnpay-body">
+            <div class="order-info">
+                <div class="row">
+                    <div>
+                        <div class="label">Mã đơn hàng</div>
+                        <div class="value">
+                            <%= orderId %>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="label">Đơn vị</div>
+                        <div class="value">FreshCart</div>
+                    </div>
+                </div>
+                <div class="amount">
+                    <%= new Intl.NumberFormat('vi-VN').format(amount) %> ₫
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <h4>Chọn phương thức thanh toán</h4>
+                <div class="method-item selected" onclick="selectMethod(this, 'card')">
+                    <i class="fas fa-credit-card"></i>
+                    <div class="info">
+                        <div class="name">Thẻ nội địa / ATM</div>
+                        <div class="desc">Napas, Visa, MasterCard, JCB</div>
+                    </div>
+                    <div class="radio"></div>
+                </div>
+                <div class="method-item" onclick="selectMethod(this, 'qr')">
+                    <i class="fas fa-qrcode"></i>
+                    <div class="info">
+                        <div class="name">Quét mã QR</div>
+                        <div class="desc">Mở ứng dụng ngân hàng để quét</div>
+                    </div>
+                    <div class="radio"></div>
+                </div>
+                <div class="method-item" onclick="selectMethod(this, 'bank')">
+                    <i class="fas fa-university"></i>
+                    <div class="info">
+                        <div class="name">Thanh toán qua ngân hàng</div>
+                        <div class="desc">Internet Banking / Mobile Banking</div>
+                    </div>
+                    <div class="radio"></div>
+                </div>
+            </div>
+
+            <!-- Demo card form -->
+            <div class="card-form show" id="cardForm">
+                <div class="form-group">
+                    <label>Số thẻ</label>
+                    <input type="text" value="9704 0000 0000 0018" readonly>
+                </div>
+                <div class="card-row">
+                    <div class="form-group">
+                        <label>Ngày hết hạn</label>
+                        <input type="text" value="03/07" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên chủ thẻ</label>
+                        <input type="text" value="NGUYEN VAN A" readonly>
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: #9ca3af; margin-top: 4px;">
+                    <i class="fas fa-info-circle"></i> Thông tin thẻ demo - không cần nhập
+                </p>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="cancelPayment()">Hủy</button>
+                <button class="btn btn-pay" onclick="processPayment()">
+                    <i class="fas fa-lock"></i> Thanh toán
+                </button>
+            </div>
+        </div>
+        <div class="footer-note">
+            <i class="fas fa-shield-alt"></i> Đây là trang demo giả lập thanh toán VNPAY. Không có giao dịch thực nào
+            được thực hiện.
+        </div>
+    </div>
+
+    <!-- Processing overlay -->
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-box" id="processingBox">
+            <div class="spinner"></div>
+            <h3>Đang xử lý thanh toán...</h3>
+            <p>Vui lòng không đóng trang này</p>
+        </div>
+    </div>
+
+    <script>
+        function selectMethod(el, type) {
+            document.querySelectorAll('.method-item').forEach(m => m.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('cardForm').classList.toggle('show', type === 'card');
+        }
+
+        function processPayment() {
+            const overlay = document.getElementById('processingOverlay');
+            const box = document.getElementById('processingBox');
+            overlay.classList.add('show');
+
+            setTimeout(() => {
+                box.innerHTML = `
+                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                    <h3>Thanh toán thành công!</h3>
+                    <p>Đang chuyển hướng...</p>
+                `;
+                setTimeout(() => {
+                    const orderId = '<%= orderId %>';
+                    const amount = '<%= amount %>';
+                    const now = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+                    window.location.href = `/api/payment/vnpay/callback?vnp_TxnRef=${orderId}&vnp_Amount=${amount}&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_TransactionNo=VNPAY_DEMO_${Date.now()}&vnp_SecureHash=DEMO`;
+                }, 1500);
+            }, 2000);
+        }
+
+        function cancelPayment() {
+            if (confirm('Bạn có chắc muốn hủy thanh toán?')) {
+                const orderId = '<%= orderId %>';
+                const amount = '<%= amount %>';
+                window.location.href = `/api/payment/vnpay/callback?vnp_TxnRef=${orderId}&vnp_Amount=${amount}&vnp_ResponseCode=24&vnp_TransactionStatus=02&vnp_TransactionNo=&vnp_SecureHash=DEMO`;
+            }
+        }
+    </script>
+</body>
+
+</html>

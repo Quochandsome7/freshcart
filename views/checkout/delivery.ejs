@@ -1,0 +1,155 @@
+<div class="checkout-page">
+    <div class="container">
+        <!-- Checkout Steps -->
+        <div class="checkout-steps">
+            <div class="step completed">
+                <span class="step-number"><i class="fas fa-check"></i></span>
+                <span class="step-text">Thông tin giao hàng</span>
+            </div>
+            <div class="step active">
+                <span class="step-number">2</span>
+                <span class="step-text">Vận chuyển</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-text">Thanh toán</span>
+            </div>
+        </div>
+
+        <div class="checkout-layout">
+            <div class="checkout-form-section">
+                <h2>Chọn phương thức vận chuyển</h2>
+
+                <div class="shipping-address-preview">
+                    <h4><i class="fas fa-map-marker-alt"></i> Giao đến:</h4>
+                    <p><strong>
+                            <%= shippingInfo.customerName %>
+                        </strong></p>
+                    <p>
+                        <%= shippingInfo.shippingAddress %>
+                    </p>
+                    <p>
+                        <%= shippingInfo.shippingWard %>, <%= shippingInfo.shippingDistrict %>, <%=
+                                    shippingInfo.shippingProvince %>
+                    </p>
+                    <p>SĐT: <%= shippingInfo.customerPhone %>
+                    </p>
+                    <a href="/checkout" class="edit-link">Chỉnh sửa</a>
+                </div>
+
+                <form action="/checkout/select-shipping" method="POST" class="shipping-form">
+                    <div class="shipping-options">
+                        <% shippingOptions.forEach((option, idx)=> { %>
+                            <% if (option.success) { %>
+                                <label
+                                    class="shipping-option <%= selectedCarrier === option.carrier ? 'selected' : '' %>">
+                                    <input type="radio" name="carrier" value="<%= option.carrier %>"
+                                        <%=selectedCarrier===option.carrier || (!selectedCarrier && idx===0) ? 'checked'
+                                        : '' %>
+                                    data-fee="<%= option.fee %>"
+                                        onchange="updateShippingFee(this)">
+                                        <input type="hidden" name="shippingFee" value="<%= option.fee %>"
+                                            class="fee-input">
+                                        <div class="option-content">
+                                            <div class="option-header">
+                                                <span class="carrier-name">
+                                                    <% if (option.carrier==='ghtk' ) { %>
+                                                        <img src="/images/ghtk-logo.png" alt="GHTK" class="carrier-logo"
+                                                            onerror="this.style.display='none'">
+                                                        Giao Hàng Tiết Kiệm
+                                                        <% } else { %>
+                                                            <img src="/images/viettelpost-logo.png" alt="Viettel Post"
+                                                                class="carrier-logo"
+                                                                onerror="this.style.display='none'">
+                                                            Viettel Post
+                                                            <% } %>
+                                                </span>
+                                                <span class="shipping-fee">
+                                                    <%= formatCurrency(option.fee) %>
+                                                </span>
+                                            </div>
+                                            <span class="delivery-time">
+                                                <i class="fas fa-clock"></i>
+                                                <%= option.estimatedDays %>
+                                            </span>
+                                        </div>
+                                </label>
+                                <% } %>
+                                    <% }); %>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="/checkout" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Tiếp tục thanh toán <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="checkout-summary">
+                <h3>Đơn hàng của bạn</h3>
+                <div class="summary-items">
+                    <% cart.items.forEach(item=> { %>
+                        <div class="summary-item">
+                            <img src="<%= item.image %>" alt="<%= item.name %>"
+                                onerror="this.src='https://placehold.co/60x60/f1f5f9/475569?text=P'">
+                            <div class="item-info">
+                                <span class="item-name">
+                                    <%= item.name %>
+                                </span>
+                                <span class="item-qty">x<%= item.quantity %></span>
+                            </div>
+                            <span class="item-total">
+                                <%= formatCurrency(item.price * item.quantity) %>
+                            </span>
+                        </div>
+                        <% }); %>
+                </div>
+                <hr>
+                <div class="summary-row">
+                    <span>Tạm tính:</span>
+                    <span>
+                        <%= formatCurrency(cart.subtotal) %>
+                    </span>
+                </div>
+                <div class="summary-row" id="shippingFeeRow">
+                    <span>Phí vận chuyển:</span>
+                    <span id="shippingFeeDisplay">
+                        <%= formatCurrency(shippingOptions[0]?.fee || 0) %>
+                    </span>
+                </div>
+                <hr>
+                <div class="summary-row total">
+                    <span>Tổng cộng:</span>
+                    <span id="totalDisplay">
+                        <%= formatCurrency(cart.subtotal + (shippingOptions[0]?.fee || 0)) %>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const subtotal = <%= cart.subtotal %>;
+
+    function updateShippingFee(radio) {
+        const fee = parseInt(radio.dataset.fee);
+        document.querySelector('.fee-input').value = fee;
+
+        // Update display
+        document.getElementById('shippingFeeDisplay').textContent = formatCurrency(fee);
+        document.getElementById('totalDisplay').textContent = formatCurrency(subtotal + fee);
+
+        // Update selected styles
+        document.querySelectorAll('.shipping-option').forEach(opt => opt.classList.remove('selected'));
+        radio.closest('.shipping-option').classList.add('selected');
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+</script>

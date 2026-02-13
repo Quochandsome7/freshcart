@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> | FreshCart Admin
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <%- style %>
+</head>
+
+<body class="admin-body">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <a href="/admin" class="logo">
+                <span class="logo-icon">🥬</span>
+                <span class="logo-text">FreshCart</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/admin" class="nav-item <%= currentPath === '/admin' ? 'active' : '' %>">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/admin/products" class="nav-item <%= currentPath.includes('/products') ? 'active' : '' %>">
+                <i class="fas fa-box"></i>
+                <span>Sản phẩm</span>
+            </a>
+            <a href="/admin/orders" class="nav-item <%= currentPath.includes('/orders') ? 'active' : '' %>">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Đơn hàng</span>
+            </a>
+            <a href="/admin/inventory" class="nav-item <%= currentPath.includes('/inventory') ? 'active' : '' %>">
+                <i class="fas fa-warehouse"></i>
+                <span>Tồn kho</span>
+            </a>
+            <a href="/admin/categories" class="nav-item <%= currentPath.includes('/categories') ? 'active' : '' %>">
+                <i class="fas fa-tags"></i>
+                <span>Danh mục</span>
+            </a>
+            <a href="/admin/users" class="nav-item <%= currentPath.includes('/users') ? 'active' : '' %>">
+                <i class="fas fa-users"></i>
+                <span>Người dùng</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/" target="_blank"><i class="fas fa-external-link-alt"></i> Xem website</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </div>
+    </aside>
+
+    <!-- Admin Main Content -->
+    <div class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">
+                    <%= title %>
+                </h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-name">
+                    <i class="fas fa-user-circle"></i>
+                    <%= user.fullName %>
+                </span>
+            </div>
+        </header>
+
+        <% if (message) { %>
+            <div class="alert alert-<%= message.type %>">
+                <i class="fas fa-<%= message.type === 'success' ? 'check-circle' : 'exclamation-circle' %>"></i>
+                <%= message.text %>
+            </div>
+            <% } %>
+
+                <div class="admin-content">
+                    <%- body %>
+                </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+    <%- script %>
+</body>
+
+</html>

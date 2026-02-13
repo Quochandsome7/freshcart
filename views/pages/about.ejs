@@ -1,0 +1,187 @@
+<div class="about-page">
+    <div class="container">
+        <%- include('../partials/breadcrumb', { path: [ { name: 'Trang chủ' , url: '/' }, { name: 'Về chúng tôi' } ]})
+            %>
+
+            <section class="about-hero">
+                <h1 class="page-title">Về FreshCart</h1>
+                <p class="subtitle">Cung cấp thực phẩm hữu cơ chất lượng cao cho sức khỏe gia đình Việt</p>
+            </section>
+
+            <section class="about-content">
+                <div class="content-grid">
+                    <div class="content-text">
+                        <h2>Câu chuyện của chúng tôi</h2>
+                        <p>FreshCart được thành lập với sứ mệnh mang đến cho người tiêu dùng Việt Nam những sản phẩm
+                            thực phẩm hữu cơ tươi ngon, an toàn và có nguồn gốc rõ ràng.</p>
+                        <p>Chúng tôi tin rằng mỗi gia đình đều xứng đáng được thưởng thức những sản phẩm tốt nhất từ
+                            thiên nhiên, không hóa chất, không thuốc trừ sâu, được trồng và chăm sóc theo quy trình hữu
+                            cơ nghiêm ngặt.</p>
+                    </div>
+                    <div class="content-image"
+                        style="display: flex; align-items: center; justify-content: center; background: #f8f6f0; border-radius: var(--radius-lg); padding: 2rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+                            <!-- Four-leaf clover -->
+                            <g transform="translate(200, 140)">
+                                <!-- Top leaf -->
+                                <path
+                                    d="M0,-70 C25,-70 45,-50 45,-25 C45,0 25,10 0,10 C-25,10 -45,0 -45,-25 C-45,-50 -25,-70 0,-70Z"
+                                    fill="#4CAF50" transform="rotate(0)" />
+                                <!-- Right leaf -->
+                                <path
+                                    d="M0,-70 C25,-70 45,-50 45,-25 C45,0 25,10 0,10 C-25,10 -45,0 -45,-25 C-45,-50 -25,-70 0,-70Z"
+                                    fill="#66BB6A" transform="rotate(90)" />
+                                <!-- Bottom leaf -->
+                                <path
+                                    d="M0,-70 C25,-70 45,-50 45,-25 C45,0 25,10 0,10 C-25,10 -45,0 -45,-25 C-45,-50 -25,-70 0,-70Z"
+                                    fill="#81C784" transform="rotate(180)" />
+                                <!-- Left leaf -->
+                                <path
+                                    d="M0,-70 C25,-70 45,-50 45,-25 C45,0 25,10 0,10 C-25,10 -45,0 -45,-25 C-45,-50 -25,-70 0,-70Z"
+                                    fill="#388E3C" transform="rotate(270)" />
+                                <!-- Center circle -->
+                                <circle cx="0" cy="0" r="12" fill="white" opacity="0.9" />
+                                <!-- Leaf veins -->
+                                <line x1="0" y1="-10" x2="0" y2="-55" stroke="white" stroke-width="2" opacity="0.5" />
+                                <line x1="10" y1="0" x2="55" y2="0" stroke="white" stroke-width="2" opacity="0.5" />
+                                <line x1="0" y1="10" x2="0" y2="55" stroke="white" stroke-width="2" opacity="0.5" />
+                                <line x1="-10" y1="0" x2="-55" y2="0" stroke="white" stroke-width="2" opacity="0.5" />
+                            </g>
+                            <!-- FRESH CART text -->
+                            <text x="200" y="260" text-anchor="middle" font-family="Georgia, serif" font-size="42"
+                                font-weight="bold" fill="#2E7D32" letter-spacing="6">FRESH CART</text>
+                            <!-- Decorative lines -->
+                            <line x1="80" y1="285" x2="155" y2="285" stroke="#4CAF50" stroke-width="2" />
+                            <line x1="245" y1="285" x2="320" y2="285" stroke="#4CAF50" stroke-width="2" />
+                            <!-- ORGANIC text -->
+                            <text x="200" y="292" text-anchor="middle" font-family="Arial, sans-serif" font-size="28"
+                                font-weight="bold" fill="#4CAF50" letter-spacing="8">ORGANIC</text>
+                            <!-- Tagline -->
+                            <text x="200" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="14"
+                                fill="#888" letter-spacing="2">CHỌN SỨC KHỎE - CHỌN HỮU CƠ</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">🌱</div>
+                        <h3>100% Hữu cơ</h3>
+                        <p>Tất cả sản phẩm đều có chứng nhận hữu cơ quốc tế</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">🚚</div>
+                        <h3>Giao hàng nhanh</h3>
+                        <p>Cam kết giao hàng trong 24h với sản phẩm tươi mới</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">💚</div>
+                        <h3>An toàn tuyệt đối</h3>
+                        <p>Không hóa chất, không thuốc trừ sâu, an toàn cho sức khỏe</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">🤝</div>
+                        <h3>Hỗ trợ nông dân</h3>
+                        <p>Mua trực tiếp từ nông dân, giá công bằng</p>
+                    </div>
+                </div>
+
+                <div class="mission-section">
+                    <h2>Sứ mệnh của chúng tôi</h2>
+                    <p>Chúng tôi cam kết:</p>
+                    <ul>
+                        <li>✓ Cung cấp sản phẩm hữu cơ chất lượng cao nhất</li>
+                        <li>✓ Minh bạch về nguồn gốc và quy trình sản xuất</li>
+                        <li>✓ Hỗ trợ và phát triển cộng đồng nông dân hữu cơ Việt Nam</li>
+                        <li>✓ Bảo vệ môi trường và phát triển bền vững</li>
+                        <li>✓ Mang lại sức khỏe tốt nhất cho khách hàng</li>
+                    </ul>
+                </div>
+            </section>
+    </div>
+</div>
+
+<style>
+    .about-page {
+        padding: 2rem 0;
+    }
+
+    .about-hero {
+        text-align: center;
+        padding: 3rem 0;
+    }
+
+    .about-hero .subtitle {
+        font-size: 1.25rem;
+        color: var(--gray-600);
+        margin-top: 1rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+        margin: 3rem 0;
+    }
+
+    .content-text h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .content-image img {
+        width: 100%;
+        border-radius: var(--radius-lg);
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .value-card {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        text-align: center;
+        box-shadow: var(--shadow);
+    }
+
+    .value-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .mission-section {
+        background: var(--gray-50);
+        padding: 3rem;
+        border-radius: var(--radius-lg);
+        margin: 3rem 0;
+    }
+
+    .mission-section h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .mission-section ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .mission-section li {
+        padding: 0.5rem 0;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+
+        .content-grid,
+        .values-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

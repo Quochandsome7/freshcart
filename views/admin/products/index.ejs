@@ -1,0 +1,304 @@
+<div class="page-actions">
+    <button class="btn btn-primary" onclick="document.getElementById('addProductModal').style.display='flex'">
+        <i class="fas fa-plus"></i> Thêm sản phẩm
+    </button>
+</div>
+
+<div class="card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá</th>
+                <th>Tồn kho</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% products.forEach(product=> { %>
+                <tr>
+                    <td><code><%= product.sku %></code></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <% if (product.images && product.images.length> 0) { %>
+                                <img src="<%= product.images[0] %>" alt=""
+                                    style="width:40px;height:40px;border-radius:6px;object-fit:cover;">
+                                <% } %>
+                                    <div>
+                                        <strong>
+                                            <%= product.name %>
+                                        </strong>
+                                        <% if (product.isFeatured) { %>
+                                            <span class="badge badge-success" style="margin-left:4px;">Nổi bật</span>
+                                            <% } %>
+                                    </div>
+                        </div>
+                    </td>
+                    <td>
+                        <%= product.category ? product.category.name : '—' %>
+                    </td>
+                    <td>
+                        <%= formatCurrency(product.price) %>
+                            <% if (product.originalPrice) { %>
+                                <br><small style="text-decoration:line-through;color:#94a3b8;">
+                                    <%= formatCurrency(product.originalPrice) %>
+                                </small>
+                                <% } %>
+                    </td>
+                    <td>
+                        <%= product.stock %>
+                    </td>
+                    <td>
+                        <span class="badge badge-<%= product.isActive ? 'success' : 'error' %>">
+                            <%= product.isActive ? 'Đang bán' : 'Ngừng bán' %>
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editProduct(<%= product.id %>)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <form action="/admin/products/<%= product.id %>/delete" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                data-confirm="Bạn có chắc muốn xóa sản phẩm này?">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }); %>
+                    <% if (products.length===0) { %>
+                        <tr>
+                            <td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">Chưa có sản phẩm nào
+                            </td>
+                        </tr>
+                        <% } %>
+        </tbody>
+    </table>
+</div>
+
+<% if (totalPages> 1) { %>
+    <div class="pagination" style="display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;">
+        <% for(let i=1; i <=totalPages; i++) { %>
+            <a href="/admin/products?page=<%= i %>"
+                class="btn btn-sm <%= i === currentPage ? 'btn-primary' : 'btn-secondary' %>">
+                <%= i %>
+            </a>
+            <% } %>
+    </div>
+    <% } %>
+
+        <!-- Add Product Modal -->
+        <div id="addProductModal"
+            style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+            <div
+                style="background:#fff;border-radius:12px;padding:2rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                    <h2 style="margin:0;">Thêm sản phẩm mới</h2>
+                    <button onclick="document.getElementById('addProductModal').style.display='none'"
+                        style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+                </div>
+                <form action="/admin/products" method="POST">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label>SKU *</label>
+                            <input type="text" name="sku" class="form-control" required placeholder="VD: VEG004">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên sản phẩm *</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Mô tả</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Giá bán *</label>
+                            <input type="number" name="price" class="form-control" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Giá gốc</label>
+                            <input type="number" name="originalPrice" class="form-control" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Tồn kho</label>
+                            <input type="number" name="stock" class="form-control" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Danh mục</label>
+                            <select name="categoryId" class="form-control">
+                                <option value="">-- Chọn danh mục --</option>
+                                <% categories.forEach(cat=> { %>
+                                    <option value="<%= cat.id %>">
+                                        <%= cat.name %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Loại Organic</label>
+                            <input type="text" name="organicType" class="form-control" placeholder="VD: USDA Organic">
+                        </div>
+                        <div class="form-group">
+                            <label>Chứng nhận</label>
+                            <input type="text" name="certification" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Khối lượng (g)</label>
+                            <input type="number" name="weight" class="form-control" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn vị</label>
+                            <input type="text" name="unit" class="form-control" value="kg">
+                        </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Hình ảnh (JSON array URLs)</label>
+                            <input type="text" name="images" class="form-control" placeholder='["https://..."]'>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" name="isFeatured"> Sản phẩm nổi bật</label>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem;">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="document.getElementById('addProductModal').style.display='none'">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Product Modal -->
+        <div id="editProductModal"
+            style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+            <div
+                style="background:#fff;border-radius:12px;padding:2rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                    <h2 style="margin:0;">Sửa sản phẩm</h2>
+                    <button onclick="document.getElementById('editProductModal').style.display='none'"
+                        style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+                </div>
+                <form id="editProductForm" method="POST">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label>SKU *</label>
+                            <input type="text" name="sku" id="edit_sku" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên sản phẩm *</label>
+                            <input type="text" name="name" id="edit_name" class="form-control" required>
+                        </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Mô tả</label>
+                            <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Giá bán *</label>
+                            <input type="number" name="price" id="edit_price" class="form-control" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Giá gốc</label>
+                            <input type="number" name="originalPrice" id="edit_originalPrice" class="form-control"
+                                min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Tồn kho</label>
+                            <input type="number" name="stock" id="edit_stock" class="form-control" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Danh mục</label>
+                            <select name="categoryId" id="edit_categoryId" class="form-control">
+                                <option value="">-- Chọn danh mục --</option>
+                                <% categories.forEach(cat=> { %>
+                                    <option value="<%= cat.id %>">
+                                        <%= cat.name %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Loại Organic</label>
+                            <input type="text" name="organicType" id="edit_organicType" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Chứng nhận</label>
+                            <input type="text" name="certification" id="edit_certification" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Khối lượng (g)</label>
+                            <input type="number" name="weight" id="edit_weight" class="form-control" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn vị</label>
+                            <input type="text" name="unit" id="edit_unit" class="form-control">
+                        </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Hình ảnh (URL)</label>
+                            <input type="text" name="imageUrl" id="edit_imageUrl" class="form-control"
+                                placeholder="Dán link ảnh vào đây...">
+                            <small style="color:#64748b;">Dán link ảnh từ Unsplash, Pexels... VD:
+                                https://images.unsplash.com/photo-xxx</small>
+                            <div id="edit_imagePreview" style="margin-top:0.5rem;"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem;">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="document.getElementById('editProductModal').style.display='none'">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <%- contentFor('script') %>
+            <script>
+                var productsData = <% - JSON.stringify(products.map(function (p) { return { id: p.id, sku: p.sku, name: p.name, description: p.description, price: p.price, originalPrice: p.originalPrice, stock: p.stock, categoryId: p.categoryId, organicType: p.organicType, certification: p.certification, weight: p.weight, unit: p.unit, images: p.images || [] }; })) %>;
+
+                var productsMap = {};
+                productsData.forEach(function (p) { productsMap[p.id] = p; });
+
+                function editProduct(id) {
+                    var product = productsMap[id];
+                    if (!product) { alert('Không tìm thấy sản phẩm!'); return; }
+
+                    document.getElementById('editProductForm').action = '/admin/products/' + product.id + '/update';
+                    document.getElementById('edit_sku').value = product.sku || '';
+                    document.getElementById('edit_name').value = product.name || '';
+                    document.getElementById('edit_description').value = product.description || '';
+                    document.getElementById('edit_price').value = product.price || '';
+                    document.getElementById('edit_originalPrice').value = product.originalPrice || '';
+                    document.getElementById('edit_stock').value = product.stock || 0;
+                    document.getElementById('edit_categoryId').value = product.categoryId || '';
+                    document.getElementById('edit_organicType').value = product.organicType || '';
+                    document.getElementById('edit_certification').value = product.certification || '';
+                    document.getElementById('edit_weight').value = product.weight || '';
+                    document.getElementById('edit_unit').value = product.unit || '';
+
+                    var images = product.images || [];
+                    var imageUrl = (images.length > 0) ? images[0] : '';
+                    document.getElementById('edit_imageUrl').value = imageUrl;
+                    updateImagePreview(imageUrl);
+
+                    document.getElementById('editProductModal').style.display = 'flex';
+                }
+
+                function updateImagePreview(url) {
+                    var preview = document.getElementById('edit_imagePreview');
+                    if (url && url.trim() !== '') {
+                        preview.innerHTML = '<img src="' + url + '" style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;">';
+                    } else {
+                        preview.innerHTML = '<span style="color:#94a3b8;font-size:0.85rem;">Chưa có ảnh</span>';
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var imageInput = document.getElementById('edit_imageUrl');
+                    if (imageInput) {
+                        imageInput.addEventListener('input', function () {
+                            updateImagePreview(this.value);
+                        });
+                    }
+                });
+            </script>

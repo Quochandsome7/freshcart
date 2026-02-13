@@ -1,0 +1,48 @@
+<div class="auth-page">
+    <div class="container">
+        <div class="auth-box">
+            <h1 class="auth-title">Đăng nhập</h1>
+            <p class="auth-subtitle">Chào mừng bạn quay lại FreshCart!</p>
+
+            <form action="/login" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Nhập email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember">
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>hoặc</span>
+            </div>
+
+            <p class="auth-footer">
+                Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+            </p>
+            <p class="auth-footer">
+                <a href="/forgot-password" class="forgot-link">Quên mật khẩu?</a>
+            </p>
+        </div>
+    </div>
+</div>

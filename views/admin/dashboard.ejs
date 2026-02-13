@@ -1,0 +1,118 @@
+<!-- Dashboard Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div>
+        <div class="stat-info">
+            <p class="stat-label">Đơn hàng hôm nay</p>
+            <h3 class="stat-value">
+                <%= stats.todayOrders %>
+            </h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="stat-info">
+            <p class="stat-label">Doanh thu tháng</p>
+            <h3 class="stat-value">
+                <%= formatCurrency(stats.totalRevenue) %>
+            </h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-box"></i></div>
+        <div class="stat-info">
+            <p class="stat-label">Sản phẩm</p>
+            <h3 class="stat-value">
+                <%= stats.totalProducts %>
+            </h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <p class="stat-label">Khách hàng</p>
+            <h3 class="stat-value">
+                <%= stats.totalUsers %>
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Recent Orders -->
+    <div class="card recent-orders">
+        <div class="card-header">
+            <h3>Đơn hàng mới nhất</h3>
+            <a href="/admin/orders" class="btn btn-sm btn-secondary">Xem tất cả</a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% recentOrders.forEach(order=> { %>
+                    <tr>
+                        <td><strong>#<%= order.orderNumber %></strong></td>
+                        <td>
+                            <%= order.customerName %>
+                        </td>
+                        <td>
+                            <%= formatCurrency(order.totalAmount) %>
+                        </td>
+                        <td><span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'info' %>">
+                                <%= getStatusText(order.status) %>
+                            </span></td>
+                    </tr>
+                    <% }); %>
+                        <% if (recentOrders.length===0) { %>
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#94a3b8;">Chưa có đơn hàng</td>
+                            </tr>
+                            <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="card low-stock">
+        <div class="card-header">
+            <h3>Sản phẩm sắp hết hàng</h3>
+            <a href="/admin/inventory" class="btn btn-sm btn-secondary">Quản lý kho</a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Tồn kho</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% lowStock.forEach(p=> { %>
+                    <tr>
+                        <td>
+                            <%= p.name %>
+                        </td>
+                        <td>
+                            <%= p.stock %>
+                        </td>
+                        <td><span class="badge badge-<%= p.stock === 0 ? 'error' : 'warning' %>">
+                                <%= p.stock===0 ? 'Hết hàng' : 'Sắp hết' %>
+                            </span></td>
+                    </tr>
+                    <% }); %>
+                        <% if (lowStock.length===0) { %>
+                            <tr>
+                                <td colspan="3" style="text-align:center;color:#94a3b8;">Tất cả sản phẩm đều đủ hàng
+                                </td>
+                            </tr>
+                            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

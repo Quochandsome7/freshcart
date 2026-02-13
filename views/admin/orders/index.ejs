@@ -1,0 +1,89 @@
+<div class="page-actions">
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <a href="/admin/orders" class="btn btn-sm <%= currentStatus === 'all' ? 'btn-primary' : 'btn-secondary' %>">Tất
+            cả</a>
+        <a href="/admin/orders?status=pending"
+            class="btn btn-sm <%= currentStatus === 'pending' ? 'btn-primary' : 'btn-secondary' %>">Chờ xác nhận</a>
+        <a href="/admin/orders?status=confirmed"
+            class="btn btn-sm <%= currentStatus === 'confirmed' ? 'btn-primary' : 'btn-secondary' %>">Đã xác nhận</a>
+        <a href="/admin/orders?status=processing"
+            class="btn btn-sm <%= currentStatus === 'processing' ? 'btn-primary' : 'btn-secondary' %>">Đang xử lý</a>
+        <a href="/admin/orders?status=shipped"
+            class="btn btn-sm <%= currentStatus === 'shipped' ? 'btn-primary' : 'btn-secondary' %>">Đang giao</a>
+        <a href="/admin/orders?status=delivered"
+            class="btn btn-sm <%= currentStatus === 'delivered' ? 'btn-primary' : 'btn-secondary' %>">Đã giao</a>
+        <a href="/admin/orders?status=cancelled"
+            class="btn btn-sm <%= currentStatus === 'cancelled' ? 'btn-primary' : 'btn-secondary' %>">Đã hủy</a>
+    </div>
+</div>
+
+<div class="card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày đặt</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach(order=> { %>
+                <tr>
+                    <td><strong>#<%= order.orderNumber %></strong></td>
+                    <td>
+                        <div>
+                            <%= order.customerName %>
+                        </div>
+                        <small style="color:#94a3b8;">
+                            <%= order.customerPhone %>
+                        </small>
+                    </td>
+                    <td>
+                        <%= formatCurrency(order.totalAmount) %>
+                    </td>
+                    <td>
+                        <span
+                            class="badge badge-<%= order.paymentStatus === 'paid' ? 'success' : (order.paymentStatus === 'failed' ? 'error' : 'warning') %>">
+                            <%= getPaymentStatusText(order.paymentStatus) %>
+                        </span>
+                    </td>
+                    <td>
+                        <span
+                            class="badge badge-<%= order.status === 'delivered' ? 'success' : (order.status === 'cancelled' ? 'error' : 'info') %>">
+                            <%= getStatusText(order.status) %>
+                        </span>
+                    </td>
+                    <td>
+                        <%= formatDate(order.createdAt) %>
+                    </td>
+                    <td>
+                        <a href="/admin/orders/<%= order.id %>" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-eye"></i> Chi tiết
+                        </a>
+                    </td>
+                </tr>
+                <% }); %>
+                    <% if (orders.length===0) { %>
+                        <tr>
+                            <td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">Không có đơn hàng nào
+                            </td>
+                        </tr>
+                        <% } %>
+        </tbody>
+    </table>
+</div>
+
+<% if (totalPages> 1) { %>
+    <div class="pagination" style="display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;">
+        <% for(let i=1; i <=totalPages; i++) { %>
+            <a href="/admin/orders?page=<%= i %><%= currentStatus !== 'all' ? '&status=' + currentStatus : '' %>"
+                class="btn btn-sm <%= i === currentPage ? 'btn-primary' : 'btn-secondary' %>">
+                <%= i %>
+            </a>
+            <% } %>
+    </div>
+    <% } %>

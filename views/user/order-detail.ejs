@@ -1,0 +1,291 @@
+<div class="order-detail-page">
+    <div class="container">
+        <h1 class="page-title">Chi tiết đơn hàng</h1>
+
+        <div class="profile-layout">
+            <aside class="profile-sidebar">
+                <nav class="profile-nav">
+                    <a href="/profile" class="nav-item">
+                        <i class="fas fa-user"></i> Thông tin cá nhân
+                    </a>
+                    <a href="/orders" class="nav-item active">
+                        <i class="fas fa-box"></i> Đơn hàng của tôi
+                    </a>
+                    <a href="/logout" class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </nav>
+            </aside>
+
+            <div class="profile-content">
+                <div class="order-detail-card">
+                    <!-- Order Header -->
+                    <div class="order-detail-header">
+                        <div>
+                            <h2>Đơn hàng #<%= order.orderNumber %>
+                            </h2>
+                            <p style="color:#64748b;margin:4px 0 0;font-size:0.9rem;">
+                                <i class="fas fa-calendar"></i>
+                                <%= formatDate(order.createdAt) %>
+                            </p>
+                        </div>
+                        <div style="text-align:right;">
+                            <% if (order.paymentStatus==='pending' && order.paymentMethod !=='cod' ) { %>
+                                <span class="status-badge"
+                                    style="background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:20px;font-weight:600;">
+                                    <i class="fas fa-clock"></i> Chờ thanh toán
+                                </span>
+                                <% } else if (order.paymentStatus==='paid' || order.paymentMethod==='cod' ) { %>
+                                    <% if (order.status==='delivered' ) { %>
+                                        <span class="status-badge"
+                                            style="background:#dcfce7;color:#166534;padding:6px 14px;border-radius:20px;font-weight:600;">
+                                            <i class="fas fa-check-circle"></i> Đã giao
+                                        </span>
+                                        <% } else if (order.status==='cancelled' ) { %>
+                                            <span class="status-badge"
+                                                style="background:#fee2e2;color:#991b1b;padding:6px 14px;border-radius:20px;font-weight:600;">
+                                                <i class="fas fa-times-circle"></i> Đã hủy
+                                            </span>
+                                            <% } else { %>
+                                                <span class="status-badge"
+                                                    style="background:#dbeafe;color:#1e40af;padding:6px 14px;border-radius:20px;font-weight:600;">
+                                                    <i class="fas fa-shipping-fast"></i> Đang được gửi
+                                                </span>
+                                                <% } %>
+                                                    <% } else { %>
+                                                        <span class="status-badge"
+                                                            style="background:#f1f5f9;color:#475569;padding:6px 14px;border-radius:20px;font-weight:600;">
+                                                            <%= getStatusText(order.status) %>
+                                                        </span>
+                                                        <% } %>
+                                                            <p style="color:#94a3b8;margin:6px 0 0;font-size:0.8rem;">
+                                                                <% if (order.paymentMethod==='bank_transfer' ) { %>
+                                                                    <i class="fas fa-university"></i> Chuyển khoản ngân
+                                                                    hàng
+                                                                    <% } else if (order.paymentMethod==='cod' ) { %>
+                                                                        <i class="fas fa-money-bill-wave"></i> Thanh
+                                                                        toán khi nhận hàng
+                                                                        <% } else if (order.paymentMethod==='vnpay' ) {
+                                                                            %>
+                                                                            <i class="fas fa-credit-card"></i> VNPay
+                                                                            <% } else if (order.paymentMethod==='momo' )
+                                                                                { %>
+                                                                                <i class="fas fa-mobile-alt"></i> Ví
+                                                                                MoMo
+                                                                                <% } %>
+                                                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-box"></i> Sản phẩm</h3>
+                        <div class="order-items-list">
+                            <% order.items.forEach(item=> { %>
+                                <div class="order-item-row">
+                                    <div class="item-info">
+                                        <span class="item-name">
+                                            <%= item.productName %>
+                                        </span>
+                                        <span class="item-sku" style="color:#94a3b8;font-size:0.8rem;">SKU: <%=
+                                                item.productSku %></span>
+                                    </div>
+                                    <div class="item-qty">x<%= item.quantity %>
+                                    </div>
+                                    <div class="item-price">
+                                        <%= formatCurrency(item.total) %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                    </div>
+
+                    <!-- Order Totals -->
+                    <div class="detail-section">
+                        <div class="order-totals">
+                            <div class="total-row">
+                                <span>Tạm tính:</span>
+                                <span>
+                                    <%= formatCurrency(order.subtotal) %>
+                                </span>
+                            </div>
+                            <div class="total-row">
+                                <span>Phí vận chuyển:</span>
+                                <span>
+                                    <%= formatCurrency(order.shippingFee) %>
+                                </span>
+                            </div>
+                            <% if (order.discount> 0) { %>
+                                <div class="total-row">
+                                    <span>Giảm giá:</span>
+                                    <span style="color:#e53e3e;">-<%= formatCurrency(order.discount) %></span>
+                                </div>
+                                <% } %>
+                                    <div class="total-row final">
+                                        <span><strong>Tổng cộng:</strong></span>
+                                        <span><strong style="color:#22c55e;font-size:1.2rem;">
+                                                <%= formatCurrency(order.totalAmount) %>
+                                            </strong></span>
+                                    </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Info -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Địa chỉ giao hàng</h3>
+                        <p><strong>
+                                <%= order.customerName %>
+                            </strong></p>
+                        <p>
+                            <%= order.customerPhone %>
+                        </p>
+                        <p>
+                            <%= order.customerEmail %>
+                        </p>
+                        <p>
+                            <%= order.shippingAddress %>
+                        </p>
+                        <% if (order.shippingWard || order.shippingDistrict || order.shippingProvince) { %>
+                            <p>
+                                <%= order.shippingWard %>, <%= order.shippingDistrict %>, <%= order.shippingProvince %>
+                            </p>
+                            <% } %>
+                                <% if (order.notes) { %>
+                                    <p style="color:#64748b;margin-top:8px;"><em><i class="fas fa-sticky-note"></i>
+                                            <%= order.notes %>
+                                        </em></p>
+                                    <% } %>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div
+                        style="padding:1.5rem;text-align:center;border-top:1px solid #e2e8f0;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+                        <a href="/orders" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                        <% if (order.paymentStatus==='pending' && order.paymentMethod !=='cod' ) { %>
+                            <a href="/orders/<%= order.id %>/payment" class="btn"
+                                style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:10px 20px;border-radius:8px;font-size:0.95rem;font-weight:600;text-decoration:none;border:none;">
+                                <i class="fas fa-credit-card"></i> Thanh toán ngay
+                            </a>
+                            <% } %>
+                                <% if (['pending', 'confirmed' ].includes(order.status)) { %>
+                                    <form action="/orders/<%= order.id %>/cancel" method="POST" style="margin:0;"
+                                        onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #<%= order.orderNumber %>?');">
+                                        <button type="submit" class="btn"
+                                            style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;cursor:pointer;padding:10px 20px;border-radius:8px;font-size:0.95rem;font-weight:600;">
+                                            <i class="fas fa-times-circle"></i> Hủy đơn hàng
+                                        </button>
+                                    </form>
+                                    <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-detail-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .order-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f0fdf4);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .order-detail-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1e293b;
+    }
+
+    .detail-section {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-section h3 {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        color: #334155;
+    }
+
+    .detail-section h3 i {
+        color: #22c55e;
+        margin-right: 8px;
+    }
+
+    .order-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 0;
+        border-bottom: 1px dashed #f1f5f9;
+    }
+
+    .order-item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .item-qty {
+        padding: 0 1.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        font-weight: 700;
+        color: #1e293b;
+        white-space: nowrap;
+    }
+
+    .order-totals {
+        max-width: 350px;
+        margin-left: auto;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0;
+        color: #475569;
+    }
+
+    .total-row.final {
+        border-top: 2px solid #e2e8f0;
+        margin-top: 0.5rem;
+        padding-top: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+        .order-detail-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .order-detail-header>div:last-child {
+            text-align: left;
+        }
+    }
+</style>

@@ -1,0 +1,132 @@
+<div class="product-detail-page">
+    <div class="container">
+        <%- include('../partials/breadcrumb', { path: [ { name: 'Trang chủ' , url: '/' }, { name: 'Sản phẩm' ,
+            url: '/products' }, { name: product.category ? product.category.name : 'Danh mục' , url: product.category
+            ? '/products/category/' + product.category.id : '/products' }, { name: product.name } ]}) %>
+
+            <div class="product-detail">
+                <div class="product-gallery">
+                    <div class="main-image">
+                        <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/product-placeholder.jpg' %>"
+                            alt="<%= product.name %>" id="mainImage"
+                            onerror="this.src='https://placehold.co/500x500/f1f5f9/475569?text=<%= encodeURIComponent(product.name) %>'">
+                    </div>
+                    <% if (product.images && product.images.length> 1) { %>
+                        <div class="thumbnail-list">
+                            <% product.images.forEach((img, idx)=> { %>
+                                <img src="<%= img %>" alt="Thumbnail" class="thumbnail <%= idx === 0 ? 'active' : '' %>"
+                                    onclick="changeImage(this)">
+                                <% }); %>
+                        </div>
+                        <% } %>
+                </div>
+
+                <div class="product-info">
+                    <% if (product.organicType==='100% Organic' ) { %>
+                        <span class="organic-badge"><i class="fas fa-leaf"></i> 100% Organic</span>
+                        <% } %>
+
+                            <h1 class="product-title">
+                                <%= product.name %>
+                            </h1>
+
+                            <div class="product-meta-info">
+                                <span>SKU: <%= product.sku %></span>
+                                <% if (product.category) { %>
+                                    <span>Danh mục: <a href="/products/category/<%= product.category.id %>">
+                                            <%= product.category.name %>
+                                        </a></span>
+                                    <% } %>
+                            </div>
+
+                            <div class="product-price-block">
+                                <span class="current-price">
+                                    <%= formatCurrency(product.price) %>
+                                </span>
+                                <% if (product.originalPrice && product.originalPrice> product.price) { %>
+                                    <span class="original-price">
+                                        <%= formatCurrency(product.originalPrice) %>
+                                    </span>
+                                    <span class="discount-badge">-<%= Math.round((1 - product.price /
+                                            product.originalPrice) * 100) %>%</span>
+                                    <% } %>
+                            </div>
+
+                            <div class="product-stock">
+                                <% if (product.stock> 10) { %>
+                                    <span class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng</span>
+                                    <% } else if (product.stock> 0) { %>
+                                        <span class="low-stock"><i class="fas fa-exclamation-circle"></i> Chỉ còn <%=
+                                                product.stock %> sản phẩm</span>
+                                        <% } else { %>
+                                            <span class="out-of-stock"><i class="fas fa-times-circle"></i> Hết
+                                                hàng</span>
+                                            <% } %>
+                            </div>
+
+                            <div class="product-description">
+                                <p>
+                                    <%= product.description %>
+                                </p>
+                            </div>
+
+                            <div class="product-specs">
+                                <div class="spec"><strong>Khối lượng:</strong>
+                                    <%= product.weight %>
+                                        <%= product.unit %>
+                                </div>
+                                <% if (product.certification) { %>
+                                    <div class="spec"><strong>Chứng nhận:</strong>
+                                        <%= product.certification %>
+                                    </div>
+                                    <% } %>
+                            </div>
+
+                            <% if (product.stock> 0) { %>
+                                <form action="/cart/add" method="POST" class="add-to-cart-form">
+                                    <input type="hidden" name="productId" value="<%= product.id %>">
+                                    <div class="quantity-selector">
+                                        <button type="button" class="qty-btn minus" onclick="changeQty(-1)">-</button>
+                                        <input type="number" name="quantity" value="1" min="1"
+                                            max="<%= product.stock %>" id="quantity" class="qty-input">
+                                        <button type="button" class="qty-btn plus" onclick="changeQty(1)">+</button>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-lg btn-add-cart">
+                                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                                    </button>
+                                </form>
+                                <% } else { %>
+                                    <button class="btn btn-disabled btn-lg" disabled>Hết hàng</button>
+                                    <% } %>
+                </div>
+            </div>
+
+            <% if (relatedProducts.length> 0) { %>
+                <section class="related-products">
+                    <h2 class="section-title">Sản phẩm liên quan</h2>
+                    <div class="products-grid">
+                        <% relatedProducts.forEach(prod=> { %>
+                            <%- include('../partials/product-card', { product: prod }) %>
+                                <% }); %>
+                    </div>
+                </section>
+                <% } %>
+    </div>
+</div>
+
+<script>
+    function changeQty(delta) {
+        const input = document.getElementById('quantity');
+        const newVal = parseInt(input.value) + delta;
+        const max = parseInt(input.max);
+        if (newVal >= 1 && newVal <= max) {
+            input.value = newVal;
+        }
+    }
+
+    function changeImage(thumb) {
+        document.getElementById('mainImage').src = thumb.src;
+        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+    }
+</script>

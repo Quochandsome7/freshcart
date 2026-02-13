@@ -1,0 +1,138 @@
+<div class="orders-page">
+    <div class="container">
+        <h1 class="page-title">Lịch sử đơn hàng</h1>
+
+        <div class="profile-layout">
+            <aside class="profile-sidebar">
+                <nav class="profile-nav">
+                    <a href="/profile" class="nav-item">
+                        <i class="fas fa-user"></i> Thông tin cá nhân
+                    </a>
+                    <a href="/orders" class="nav-item active">
+                        <i class="fas fa-box"></i> Đơn hàng của tôi
+                    </a>
+                    <a href="/logout" class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </nav>
+            </aside>
+
+            <div class="profile-content">
+                <% if (orders.length> 0) { %>
+                    <div class="orders-list">
+                        <% orders.forEach(order=> { %>
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div class="order-info">
+                                        <span class="order-number">Đơn hàng #<%= order.orderNumber %></span>
+                                        <span class="order-date">
+                                            <%= formatDate(order.createdAt) %>
+                                        </span>
+                                    </div>
+                                    <div class="order-status-group">
+                                        <% if (order.paymentStatus==='pending' && order.paymentMethod !=='cod' ) { %>
+                                            <span class="status-badge status-pending"
+                                                style="background:#fef3c7;color:#92400e;">
+                                                <i class="fas fa-clock"></i> Chờ thanh toán
+                                            </span>
+                                            <% } else if (order.paymentStatus==='paid' || order.paymentMethod==='cod' )
+                                                { %>
+                                                <% if (order.status==='delivered' ) { %>
+                                                    <span class="status-badge status-delivered"
+                                                        style="background:#dcfce7;color:#166534;">
+                                                        <i class="fas fa-check-circle"></i> Đã giao
+                                                    </span>
+                                                    <% } else if (order.status==='cancelled' ) { %>
+                                                        <span class="status-badge status-cancelled"
+                                                            style="background:#fee2e2;color:#991b1b;">
+                                                            <i class="fas fa-times-circle"></i> Đã hủy
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="status-badge status-shipped"
+                                                                style="background:#dbeafe;color:#1e40af;">
+                                                                <i class="fas fa-shipping-fast"></i> Đang được gửi
+                                                            </span>
+                                                            <% } %>
+                                                                <% } else { %>
+                                                                    <span
+                                                                        class="status-badge status-<%= order.status %>">
+                                                                        <%= getStatusText(order.status) %>
+                                                                    </span>
+                                                                    <% } %>
+                                                                        <small
+                                                                            style="display:block;text-align:right;color:#94a3b8;margin-top:4px;font-size:0.75rem;">
+                                                                            <% if (order.paymentMethod==='bank_transfer'
+                                                                                ) { %>
+                                                                                <i class="fas fa-university"></i> Chuyển
+                                                                                khoản
+                                                                                <% } else if
+                                                                                    (order.paymentMethod==='cod' ) { %>
+                                                                                    <i
+                                                                                        class="fas fa-money-bill-wave"></i>
+                                                                                    COD
+                                                                                    <% } else if
+                                                                                        (order.paymentMethod==='vnpay' )
+                                                                                        { %>
+                                                                                        <i
+                                                                                            class="fas fa-credit-card"></i>
+                                                                                        VNPay
+                                                                                        <% } else if
+                                                                                            (order.paymentMethod==='momo'
+                                                                                            ) { %>
+                                                                                            <i
+                                                                                                class="fas fa-mobile-alt"></i>
+                                                                                            MoMo
+                                                                                            <% } %>
+                                                                        </small>
+                                    </div>
+                                </div>
+                                <div class="order-items-preview">
+                                    <% order.items.slice(0, 3).forEach(item=> { %>
+                                        <span class="item-preview">
+                                            <%= item.productName %> x<%= item.quantity %>
+                                        </span>
+                                        <% }); %>
+                                            <% if (order.items.length> 3) { %>
+                                                <span class="more-items">+<%= order.items.length - 3 %> sản phẩm
+                                                        khác</span>
+                                                <% } %>
+                                </div>
+                                <div class="order-footer">
+                                    <span class="order-total">Tổng: <strong>
+                                            <%= formatCurrency(order.totalAmount) %>
+                                        </strong></span>
+                                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                        <a href="/orders/<%= order.id %>" class="btn btn-sm btn-outline">Xem chi
+                                            tiết</a>
+                                        <% if (order.paymentStatus==='pending' && order.paymentMethod !=='cod' ) { %>
+                                            <a href="/orders/<%= order.id %>/payment" class="btn btn-sm"
+                                                style="background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:500;text-decoration:none;">
+                                                <i class="fas fa-credit-card"></i> Thanh toán
+                                            </a>
+                                            <% } %>
+                                                <% if (['pending', 'confirmed' ].includes(order.status)) { %>
+                                                    <form action="/orders/<%= order.id %>/cancel" method="POST"
+                                                        style="margin:0;"
+                                                        onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #<%= order.orderNumber %>?');">
+                                                        <button type="submit" class="btn btn-sm"
+                                                            style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;cursor:pointer;padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:500;">
+                                                            <i class="fas fa-times"></i> Hủy đơn
+                                                        </button>
+                                                    </form>
+                                                    <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <div class="empty-orders">
+                            <i class="fas fa-box-open"></i>
+                            <h3>Bạn chưa có đơn hàng nào</h3>
+                            <a href="/products" class="btn btn-primary">Bắt đầu mua sắm</a>
+                        </div>
+                        <% } %>
+            </div>
+        </div>
+    </div>
+</div>

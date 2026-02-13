@@ -1,0 +1,166 @@
+<a href="/admin/orders" class="btn btn-secondary" style="margin-bottom:1rem;">
+    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+</a>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+    <!-- Order Info -->
+    <div>
+        <!-- Customer Info -->
+        <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+            <h3 style="margin-top:0;">Thông tin khách hàng</h3>
+            <table style="width:100%;">
+                <tr>
+                    <td style="padding:0.5rem 0;color:#64748b;width:140px;">Họ tên:</td>
+                    <td><strong>
+                            <%= order.customerName %>
+                        </strong></td>
+                </tr>
+                <tr>
+                    <td style="padding:0.5rem 0;color:#64748b;">Email:</td>
+                    <td>
+                        <%= order.customerEmail %>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0.5rem 0;color:#64748b;">Điện thoại:</td>
+                    <td>
+                        <%= order.customerPhone %>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0.5rem 0;color:#64748b;">Địa chỉ:</td>
+                    <td>
+                        <%= order.shippingAddress %>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card" style="padding:1.5rem;">
+            <h3 style="margin-top:0;">Chi tiết đơn hàng</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.items.forEach(item=> { %>
+                        <tr>
+                            <td>
+                                <%= item.product ? item.product.name : 'Sản phẩm đã xóa' %>
+                            </td>
+                            <td>
+                                <%= formatCurrency(item.price) %>
+                            </td>
+                            <td>
+                                <%= item.quantity %>
+                            </td>
+                            <td><strong>
+                                    <%= formatCurrency(item.price * item.quantity) %>
+                                </strong></td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align:right;">Tạm tính:</td>
+                        <td>
+                            <%= formatCurrency(order.subtotal) %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align:right;">Phí vận chuyển:</td>
+                        <td>
+                            <%= formatCurrency(order.shippingFee) %>
+                        </td>
+                    </tr>
+                    <% if (parseFloat(order.discount)> 0) { %>
+                        <tr>
+                            <td colspan="3" style="text-align:right;">Giảm giá:</td>
+                            <td>-<%= formatCurrency(order.discount) %>
+                            </td>
+                        </tr>
+                        <% } %>
+                            <tr style="font-size:1.1rem;">
+                                <td colspan="3" style="text-align:right;"><strong>Tổng cộng:</strong></td>
+                                <td><strong style="color:#22c55e;">
+                                        <%= formatCurrency(order.totalAmount) %>
+                                    </strong></td>
+                            </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Status -->
+        <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+            <h3 style="margin-top:0;">Trạng thái đơn hàng</h3>
+            <p>
+                <span
+                    class="badge badge-<%= order.status === 'delivered' ? 'success' : (order.status === 'cancelled' ? 'error' : 'info') %>"
+                    style="font-size:1rem;padding:0.5rem 1rem;">
+                    <%= getStatusText(order.status) %>
+                </span>
+            </p>
+            <% if (order.status !=='delivered' && order.status !=='cancelled' ) { %>
+                <form action="/admin/orders/<%= order.id %>/status" method="POST" style="margin-top:1rem;">
+                    <div class="form-group">
+                        <label>Cập nhật trạng thái:</label>
+                        <select name="status" class="form-control">
+                            <% if (order.status==='pending' ) { %>
+                                <option value="confirmed">Xác nhận</option>
+                                <option value="cancelled">Hủy đơn</option>
+                                <% } else if (order.status==='confirmed' ) { %>
+                                    <option value="processing">Đang xử lý</option>
+                                    <option value="cancelled">Hủy đơn</option>
+                                    <% } else if (order.status==='processing' ) { %>
+                                        <option value="shipped">Đang giao</option>
+                                        <option value="cancelled">Hủy đơn</option>
+                                        <% } else if (order.status==='shipped' ) { %>
+                                            <option value="delivered">Đã giao</option>
+                                            <% } %>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Cập nhật</button>
+                </form>
+                <% } %>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+            <h3 style="margin-top:0;">Thanh toán</h3>
+            <p><strong>Phương thức:</strong>
+                <%= order.paymentMethod==='cod' ? 'Thanh toán khi nhận hàng' : order.paymentMethod.toUpperCase() %>
+            </p>
+            <p>
+                <strong>Trạng thái:</strong>
+                <span
+                    class="badge badge-<%= order.paymentStatus === 'paid' ? 'success' : (order.paymentStatus === 'failed' ? 'error' : 'warning') %>">
+                    <%= getPaymentStatusText(order.paymentStatus) %>
+                </span>
+            </p>
+        </div>
+
+        <!-- Order Meta -->
+        <div class="card" style="padding:1.5rem;">
+            <h3 style="margin-top:0;">Thông tin đơn</h3>
+            <p><strong>Mã đơn:</strong> #<%= order.orderNumber %>
+            </p>
+            <p><strong>Ngày đặt:</strong>
+                <%= formatDate(order.createdAt) %>
+            </p>
+            <% if (order.notes) { %>
+                <p><strong>Ghi chú:</strong>
+                    <%= order.notes %>
+                </p>
+                <% } %>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FreshCart - Cửa hàng thực phẩm hữu cơ chất lượng cao">
+    <title>
+        <%= title %> | FreshCart
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <%- style %>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <span class="logo-icon">🥬</span>
+                    <span class="logo-text">FreshCart</span>
+                </a>
+
+                <nav class="nav">
+                    <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">Trang chủ</a>
+                    <a href="/products" class="nav-link <%= currentPath.startsWith('/products') ? 'active' : '' %>">Sản
+                        phẩm</a>
+                    <a href="/about" class="nav-link <%= currentPath === '/about' ? 'active' : '' %>">Về chúng tôi</a>
+                    <a href="/contact" class="nav-link <%= currentPath === '/contact' ? 'active' : '' %>">Liên hệ</a>
+                </nav>
+
+                <div class="header-actions">
+                    <form action="/products/search" method="GET" class="search-form">
+                        <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." class="search-input">
+                        <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+                    </form>
+
+                    <a href="/cart" class="cart-btn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <% if (cart && cart.totalItems> 0) { %>
+                            <span class="cart-count">
+                                <%= cart.totalItems %>
+                            </span>
+                            <% } %>
+                    </a>
+
+                    <% if (isAuthenticated) { %>
+                        <div class="user-menu">
+                            <button class="user-btn">
+                                <i class="fas fa-user"></i>
+                                <span>
+                                    <%= user.fullName %>
+                                </span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/profile"><i class="fas fa-user-circle"></i> Tài khoản</a>
+                                <a href="/orders"><i class="fas fa-box"></i> Đơn hàng</a>
+                                <% if (isAdmin) { %>
+                                    <a href="/admin"><i class="fas fa-cog"></i> Quản trị</a>
+                                    <% } %>
+                                        <hr>
+                                        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                            </div>
+                        </div>
+                        <% } else { %>
+                            <a href="/login" class="auth-btn">
+                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                            </a>
+                            <% } %>
+                </div>
+
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Messages -->
+    <% if (message) { %>
+        <div class="toast toast-<%= message.type %>">
+            <i class="fas fa-<%= message.type === 'success' ? 'check-circle' : 'exclamation-circle' %>"></i>
+            <span>
+                <%= message.text %>
+            </span>
+            <button class="toast-close">&times;</button>
+        </div>
+        <% } %>
+
+            <!-- Main Content -->
+            <main class="main">
+                <%- body %>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-grid">
+                        <div class="footer-section">
+                            <h3 class="footer-title">
+                                <span class="logo-icon">🥬</span> FreshCart
+                            </h3>
+                            <p class="footer-desc">Cung cấp thực phẩm hữu cơ tươi ngon, an toàn cho sức khỏe gia đình
+                                bạn.</p>
+                            <div class="social-links">
+                                <a href="#"><i class="fab fa-facebook"></i></a>
+                                <a href="#"><i class="fab fa-instagram"></i></a>
+                                <a href="#"><i class="fab fa-youtube"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="footer-section">
+                            <h4>Liên kết nhanh</h4>
+                            <ul>
+                                <li><a href="/products">Sản phẩm</a></li>
+                                <li><a href="/about">Về chúng tôi</a></li>
+                                <li><a href="/contact">Liên hệ</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="footer-section">
+                            <h4>Hỗ trợ khách hàng</h4>
+                            <ul>
+                                <li><a href="/shopping-guide">Hướng dẫn mua hàng</a></li>
+                                <li><a href="/return-policy">Chính sách đổi trả</a></li>
+                                <li><a href="/shipping-policy">Chính sách vận chuyển</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="footer-section">
+                            <h4>Liên hệ</h4>
+                            <ul class="contact-info">
+                                <li><i class="fas fa-map-marker-alt"></i> Tổ 3, phường Quyết Thắng, TP. Thái Nguyên</li>
+                                <li><i class="fas fa-phone"></i> 0348778086</li>
+                                <li><i class="fas fa-envelope"></i> info@freshcart.vn</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="footer-bottom">
+                        <p>&copy; 2024 FreshCart. All rights reserved.</p>
+                        <div class="payment-methods">
+                            <img src="/images/vnpay.png" alt="VNPay" onerror="this.style.display='none'">
+                            <img src="/images/momo.png" alt="MoMo" onerror="this.style.display='none'">
+                            <img src="/images/cod.png" alt="COD" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            <script>window.__isAuthenticated = <%= isAuthenticated ? 'true' : 'false' %>;</script>
+            <script src="/js/main.js"></script>
+            <%- script %>
+</body>
+
+</html>

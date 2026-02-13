@@ -1,0 +1,104 @@
+<div class="products-page">
+    <div class="container">
+        <%- include('../partials/breadcrumb', { path: [ { name: 'Trang chủ' , url: '/' }, { name: 'Sản phẩm' } ]}) %>
+
+            <div class="products-header">
+                <h1 class="page-title">Sản phẩm</h1>
+                <p class="products-count">Hiển thị <%= products.length %> / <%= totalProducts %> sản phẩm</p>
+            </div>
+
+            <div class="products-layout">
+                <!-- Sidebar Filters -->
+                <aside class="products-sidebar">
+                    <div class="filter-section">
+                        <h3 class="filter-title">Danh mục</h3>
+                        <ul class="filter-list">
+                            <li><a href="/products" class="<%= !query.categoryId ? 'active' : '' %>">Tất cả</a></li>
+                            <% categories.forEach(cat=> { %>
+                                <li>
+                                    <a href="/products/category/<%= cat.id %>"
+                                        class="<%= query.categoryId == cat.id ? 'active' : '' %>">
+                                        <%= cat.name %>
+                                    </a>
+                                </li>
+                                <% }); %>
+                        </ul>
+                    </div>
+
+                    <div class="filter-section">
+                        <h3 class="filter-title">Loại sản phẩm</h3>
+                        <ul class="filter-list">
+                            <li>
+                                <a href="/products?organicType=100%25%20Organic"
+                                    class="<%= query.organicType === '100% Organic' ? 'active' : '' %>">
+                                    100% Organic
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/products?organicType=Natural"
+                                    class="<%= query.organicType === 'Natural' ? 'active' : '' %>">
+                                    Natural
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="filter-section">
+                        <h3 class="filter-title">Giá</h3>
+                        <form action="/products" method="GET" class="price-filter">
+                            <div class="price-inputs">
+                                <input type="number" name="minPrice" placeholder="Từ"
+                                    value="<%= query.minPrice || '' %>" class="price-input">
+                                <span>-</span>
+                                <input type="number" name="maxPrice" placeholder="Đến"
+                                    value="<%= query.maxPrice || '' %>" class="price-input">
+                            </div>
+                            <button type="submit" class="btn btn-sm">Áp dụng</button>
+                        </form>
+                    </div>
+                </aside>
+
+                <!-- Products Grid -->
+                <div class="products-main">
+                    <div class="products-toolbar">
+                        <div class="view-options">
+                            <button class="view-btn active" data-view="grid"><i class="fas fa-th"></i></button>
+                            <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                        </div>
+                        <div class="sort-options">
+                            <label>Sắp xếp:</label>
+                            <select name="sort" class="sort-select"
+                                onchange="window.location.href='?sort=' + this.value">
+                                <option value="newest" <%=query.sort==='newest' ? 'selected' : '' %>>Mới nhất</option>
+                                <option value="price_asc" <%=query.sort==='price_asc' ? 'selected' : '' %>>Giá tăng dần
+                                </option>
+                                <option value="price_desc" <%=query.sort==='price_desc' ? 'selected' : '' %>>Giá giảm
+                                    dần</option>
+                                <option value="name_asc" <%=query.sort==='name_asc' ? 'selected' : '' %>>Tên A-Z
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <% if (products.length> 0) { %>
+                        <div class="products-grid">
+                            <% products.forEach(product=> { %>
+                                <%- include('../partials/product-card', { product }) %>
+                                    <% }); %>
+                        </div>
+
+                        <% if (totalPages> 1) { %>
+                            <%- include('../partials/pagination', { currentPage, totalPages }) %>
+                                <% } %>
+                                    <% } else { %>
+                                        <div class="no-products">
+                                            <i class="fas fa-search"></i>
+                                            <h3>Không tìm thấy sản phẩm</h3>
+                                            <p>Vui lòng thử lại với bộ lọc khác</p>
+                                            <a href="/products" class="btn btn-primary">Xem tất cả sản phẩm</a>
+                                        </div>
+                                        <% } %>
+                </div>
+            </div>
+    </div>
+</div>

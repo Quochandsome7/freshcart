@@ -1,0 +1,38 @@
+<nav class="pagination">
+    <% if (currentPage> 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="page-link prev">
+            <i class="fas fa-chevron-left"></i> Trước
+        </a>
+        <% } %>
+
+            <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages, currentPage + 2); %>
+
+                <% if (startPage> 1) { %>
+                    <a href="?page=1" class="page-link">1</a>
+                    <% if (startPage> 2) { %>
+                        <span class="page-dots">...</span>
+                        <% } %>
+                            <% } %>
+
+                                <% for (let i=startPage; i <=endPage; i++) { %>
+                                    <a href="?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>">
+                                        <%= i %>
+                                    </a>
+                                    <% } %>
+
+                                        <% if (endPage < totalPages) { %>
+                                            <% if (endPage < totalPages - 1) { %>
+                                                <span class="page-dots">...</span>
+                                                <% } %>
+                                                    <a href="?page=<%= totalPages %>" class="page-link">
+                                                        <%= totalPages %>
+                                                    </a>
+                                                    <% } %>
+
+                                                        <% if (currentPage < totalPages) { %>
+                                                            <a href="?page=<%= currentPage + 1 %>"
+                                                                class="page-link next">
+                                                                Sau <i class="fas fa-chevron-right"></i>
+                                                            </a>
+                                                            <% } %>
+</nav>

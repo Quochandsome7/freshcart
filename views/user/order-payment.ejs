@@ -1,0 +1,405 @@
+<div class="order-payment-page">
+    <div class="container">
+        <h1 class="page-title">Thanh toán đơn hàng</h1>
+
+        <div class="profile-layout">
+            <aside class="profile-sidebar">
+                <nav class="profile-nav">
+                    <a href="/profile" class="nav-item">
+                        <i class="fas fa-user"></i> Thông tin cá nhân
+                    </a>
+                    <a href="/orders" class="nav-item active">
+                        <i class="fas fa-box"></i> Đơn hàng của tôi
+                    </a>
+                    <a href="/logout" class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </nav>
+            </aside>
+
+            <div class="profile-content">
+                <div class="payment-card">
+                    <!-- Order Info Header -->
+                    <div class="payment-header">
+                        <div>
+                            <h2><i class="fas fa-file-invoice-dollar"></i> Đơn hàng #<%= order.orderNumber %>
+                            </h2>
+                            <p style="color:#64748b;margin:4px 0 0;font-size:0.9rem;">
+                                <i class="fas fa-calendar"></i>
+                                <%= formatDate(order.createdAt) %>
+                            </p>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="payment-amount">
+                                <%= formatCurrency(order.totalAmount) %>
+                            </span>
+                            <p style="color:#64748b;margin:4px 0 0;font-size:0.85rem;">Tổng thanh toán</p>
+                        </div>
+                    </div>
+
+                    <!-- Bank Transfer Info -->
+                    <div class="bank-transfer-box">
+                        <div class="bank-transfer-header">
+                            <i class="fas fa-university"></i>
+                            <span>Thông tin chuyển khoản</span>
+                        </div>
+                        <div class="bank-transfer-content">
+                            <div class="bank-transfer-details">
+                                <div class="transfer-row">
+                                    <span class="label">Ngân hàng:</span>
+                                    <span class="value">
+                                        <img src="<%= bankInfo.bank.logo %>" alt="<%= bankInfo.bank.name %>"
+                                            style="height:20px;vertical-align:middle;margin-right:6px;"
+                                            onerror="this.style.display='none'">
+                                        <strong>
+                                            <%= bankInfo.bank.name %>
+                                        </strong>
+                                    </span>
+                                </div>
+                                <div class="transfer-row">
+                                    <span class="label">Số tài khoản:</span>
+                                    <span class="value">
+                                        <strong id="accountNumber">
+                                            <%= bankInfo.accountNumber %>
+                                        </strong>
+                                        <button type="button" class="copy-btn"
+                                            onclick="copyText('<%= bankInfo.accountNumber %>', this)" title="Sao chép">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="transfer-row">
+                                    <span class="label">Chủ tài khoản:</span>
+                                    <span class="value"><strong>
+                                            <%= bankInfo.accountName %>
+                                        </strong></span>
+                                </div>
+                                <div class="transfer-row">
+                                    <span class="label">Số tiền:</span>
+                                    <span class="value amount-highlight">
+                                        <%= formatCurrency(bankInfo.amount) %>
+                                    </span>
+                                </div>
+                                <div class="transfer-row">
+                                    <span class="label">Nội dung CK:</span>
+                                    <span class="value">
+                                        <strong style="color:#2563eb;" id="transferContent">
+                                            <%= bankInfo.transferContent %>
+                                        </strong>
+                                        <button type="button" class="copy-btn"
+                                            onclick="copyText('<%= bankInfo.transferContent %>', this)"
+                                            title="Sao chép">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bank-transfer-qr">
+                                <p style="font-size:0.85rem;color:#64748b;margin:0 0 0.5rem 0;text-align:center;">
+                                    Quét mã QR để chuyển khoản:</p>
+                                <img src="<%= bankInfo.qrCodeUrl %>" alt="QR Code chuyển khoản" class="qr-code-img"
+                                    onerror="this.outerHTML='<p style=color:#94a3b8>Không tải được QR Code</p>'">
+                            </div>
+                        </div>
+                        <div class="bank-transfer-notice">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Vui lòng chuyển khoản đúng <strong>số tiền</strong> và <strong>nội dung chuyển
+                                    khoản</strong> để đơn hàng được xử lý nhanh nhất. Đơn hàng sẽ được xác nhận sau khi
+                                chúng tôi nhận được thanh toán.</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Items Preview -->
+                    <div class="order-items-section">
+                        <h3><i class="fas fa-box"></i> Sản phẩm trong đơn</h3>
+                        <% order.items.forEach(item=> { %>
+                            <div class="order-item-row">
+                                <div class="item-info">
+                                    <span class="item-name">
+                                        <%= item.productName %>
+                                    </span>
+                                </div>
+                                <div class="item-qty">x<%= item.quantity %>
+                                </div>
+                                <div class="item-price">
+                                    <%= formatCurrency(item.total) %>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="payment-actions">
+                        <a href="/orders/<%= order.id %>" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Quay lại đơn hàng
+                        </a>
+                        <a href="/orders" class="btn btn-outline">
+                            <i class="fas fa-list"></i> Danh sách đơn hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #eff6ff);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .payment-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1e293b;
+    }
+
+    .payment-header h2 i {
+        color: #3b82f6;
+        margin-right: 8px;
+    }
+
+    .payment-amount {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #22c55e;
+    }
+
+    .bank-transfer-box {
+        margin: 1.5rem;
+        border: 2px solid #22c55e;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .bank-transfer-header {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .bank-transfer-content {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
+        padding: 1.2rem;
+        align-items: start;
+    }
+
+    .bank-transfer-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .transfer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .transfer-row:last-child {
+        border-bottom: none;
+    }
+
+    .transfer-row .label {
+        color: #64748b;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+
+    .transfer-row .value {
+        text-align: right;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .amount-highlight {
+        color: #e53e3e;
+        font-weight: 700;
+        font-size: 1.1rem !important;
+    }
+
+    .copy-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        color: #64748b;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .copy-btn.copied {
+        background: #dcfce7;
+        color: #166534;
+        border-color: #86efac;
+    }
+
+    .bank-transfer-qr {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .qr-code-img {
+        width: 220px;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+    }
+
+    .bank-transfer-notice {
+        background: #fef3c7;
+        border-top: 1px solid #fbbf24;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #92400e;
+    }
+
+    .bank-transfer-notice i {
+        color: #f59e0b;
+        margin-top: 2px;
+    }
+
+    .order-items-section {
+        padding: 1.2rem 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .order-items-section h3 {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        color: #334155;
+    }
+
+    .order-items-section h3 i {
+        color: #22c55e;
+        margin-right: 8px;
+    }
+
+    .order-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px dashed #f1f5f9;
+    }
+
+    .order-item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .item-qty {
+        padding: 0 1.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        font-weight: 700;
+        color: #1e293b;
+        white-space: nowrap;
+    }
+
+    .payment-actions {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        border-top: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .payment-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .payment-header>div:last-child {
+            text-align: left;
+        }
+
+        .bank-transfer-content {
+            grid-template-columns: 1fr;
+        }
+
+        .transfer-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .transfer-row .value {
+            text-align: left;
+        }
+    }
+</style>
+
+<script>
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i>';
+                btn.classList.remove('copied');
+            }, 2000);
+        }).catch(() => {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i>';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+</script>

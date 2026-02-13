@@ -1,0 +1,274 @@
+<div class="checkout-page">
+    <div class="container">
+        <!-- Checkout Steps -->
+        <div class="checkout-steps">
+            <div class="step active">
+                <span class="step-number">1</span>
+                <span class="step-text">Thông tin giao hàng</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-text">Vận chuyển</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-text">Thanh toán</span>
+            </div>
+        </div>
+
+        <div class="checkout-layout">
+            <div class="checkout-form-section">
+                <h2>Thông tin giao hàng</h2>
+
+                <form action="/checkout/shipping-info" method="POST" class="checkout-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName">Họ và tên *</label>
+                            <input type="text" id="customerName" name="customerName"
+                                value="<%= shippingInfo.customerName || '' %>" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label for="customerEmail">Email *</label>
+                            <input type="email" id="customerEmail" name="customerEmail"
+                                value="<%= shippingInfo.customerEmail || '' %>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Số điện thoại *</label>
+                            <input type="tel" id="customerPhone" name="customerPhone"
+                                value="<%= shippingInfo.customerPhone || '' %>" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row three-cols">
+                        <div class="form-group">
+                            <label for="shippingProvince">Tỉnh/Thành phố *</label>
+                            <select id="shippingProvince" name="shippingProvince" required>
+                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="shippingDistrict">Quận/Huyện *</label>
+                            <select id="shippingDistrict" name="shippingDistrict" required disabled>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="shippingWard">Phường/Xã *</label>
+                            <select id="shippingWard" name="shippingWard" required disabled>
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shippingAddress">Địa chỉ giao hàng *</label>
+                        <input type="text" id="shippingAddress" name="shippingAddress"
+                            value="<%= shippingInfo.shippingAddress || '' %>" placeholder="Số nhà, tên đường..."
+                            required>
+                        <small class="form-hint">Địa chỉ đầy đủ sẽ được tự động điền từ Phường/Xã, Quận/Huyện,
+                            Tỉnh/Thành phố</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Ghi chú</label>
+                        <textarea id="notes" name="notes" rows="3"
+                            placeholder="Ghi chú đơn hàng (không bắt buộc)"><%= shippingInfo.notes || '' %></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="/cart" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Tiếp tục <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="checkout-summary">
+                <h3>Đơn hàng của bạn</h3>
+                <div class="summary-items">
+                    <% cart.items.forEach(item=> { %>
+                        <div class="summary-item">
+                            <img src="<%= item.image %>" alt="<%= item.name %>"
+                                onerror="this.src='https://placehold.co/60x60/f1f5f9/475569?text=P'">
+                            <div class="item-info">
+                                <span class="item-name">
+                                    <%= item.name %>
+                                </span>
+                                <span class="item-qty">x<%= item.quantity %></span>
+                            </div>
+                            <span class="item-total">
+                                <%= formatCurrency(item.price * item.quantity) %>
+                            </span>
+                        </div>
+                        <% }); %>
+                </div>
+                <hr>
+                <div class="summary-row">
+                    <span>Tạm tính:</span>
+                    <span>
+                        <%= formatCurrency(cart.subtotal) %>
+                    </span>
+                </div>
+                <div class="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span>Tính ở bước tiếp theo</span>
+                </div>
+                <hr>
+                <div class="summary-row total">
+                    <span>Tổng cộng:</span>
+                    <span>
+                        <%= formatCurrency(cart.subtotal) %>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-hint {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #6b7280;
+    }
+</style>
+
+<script src="/js/vietnam-data.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const provinceSelect = document.getElementById('shippingProvince');
+        const districtSelect = document.getElementById('shippingDistrict');
+        const wardSelect = document.getElementById('shippingWard');
+        const addressInput = document.getElementById('shippingAddress');
+
+        // Saved values from server
+        const savedProvince = '<%= shippingInfo.shippingProvince || "" %>';
+        const savedDistrict = '<%= shippingInfo.shippingDistrict || "" %>';
+        const savedWard = '<%= shippingInfo.shippingWard || "" %>';
+
+        // Store user's street address (số nhà, tên đường)
+        let streetAddress = '';
+
+        // Populate provinces
+        Object.keys(vietnamData).sort().forEach(province => {
+            const option = document.createElement('option');
+            option.value = province;
+            option.textContent = province;
+            if (province === savedProvince) option.selected = true;
+            provinceSelect.appendChild(option);
+        });
+
+        // Province change handler
+        provinceSelect.addEventListener('change', function () {
+            const province = this.value;
+            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+            if (province && vietnamData[province]) {
+                districtSelect.disabled = false;
+                wardSelect.disabled = true;
+
+                Object.keys(vietnamData[province].districts).sort().forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    if (district === savedDistrict) option.selected = true;
+                    districtSelect.appendChild(option);
+                });
+
+                // Trigger district change if there's a saved value
+                if (savedDistrict && districtSelect.value === savedDistrict) {
+                    districtSelect.dispatchEvent(new Event('change'));
+                }
+            } else {
+                districtSelect.disabled = true;
+                wardSelect.disabled = true;
+            }
+
+            updateAddress();
+        });
+
+        // District change handler
+        districtSelect.addEventListener('change', function () {
+            const province = provinceSelect.value;
+            const district = this.value;
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+            if (province && district && vietnamData[province]?.districts[district]) {
+                wardSelect.disabled = false;
+
+                vietnamData[province].districts[district].forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward;
+                    option.textContent = ward;
+                    if (ward === savedWard) option.selected = true;
+                    wardSelect.appendChild(option);
+                });
+            } else {
+                wardSelect.disabled = true;
+            }
+
+            updateAddress();
+        });
+
+        // Ward change handler
+        wardSelect.addEventListener('change', function () {
+            updateAddress();
+        });
+
+        // Update full address
+        function updateAddress() {
+            const province = provinceSelect.value;
+            const district = districtSelect.value;
+            const ward = wardSelect.value;
+
+            // Get current street address (before comma or full if no location yet)
+            const currentAddress = addressInput.value;
+            const parts = currentAddress.split(',').map(p => p.trim());
+
+            // Keep only the street part (first part before location info)
+            if (parts.length > 1) {
+                streetAddress = parts[0];
+            } else if (!province && !district && !ward) {
+                streetAddress = currentAddress;
+            }
+
+            // Build full address
+            const locationParts = [];
+            if (ward) locationParts.push(ward);
+            if (district) locationParts.push(district);
+            if (province) locationParts.push(province);
+
+            if (locationParts.length > 0) {
+                if (streetAddress) {
+                    addressInput.value = streetAddress + ', ' + locationParts.join(', ');
+                } else {
+                    addressInput.value = locationParts.join(', ');
+                }
+            }
+        }
+
+        // Track street address input
+        addressInput.addEventListener('input', function () {
+            const value = this.value;
+            const commaIndex = value.indexOf(',');
+            if (commaIndex > 0) {
+                streetAddress = value.substring(0, commaIndex).trim();
+            } else {
+                streetAddress = value;
+            }
+        });
+
+        // Initialize if saved province exists
+        if (savedProvince) {
+            provinceSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>

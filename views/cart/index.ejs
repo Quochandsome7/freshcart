@@ -1,0 +1,388 @@
+<div class="cart-page">
+    <div class="container">
+        <h1 class="page-title">Giỏ hàng</h1>
+
+        <% if (cart.items.length> 0) { %>
+            <div class="cart-layout">
+                <div class="cart-items">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Số lượng</th>
+                                <th>Tổng</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% cart.items.forEach(item=> { %>
+                                <tr class="cart-item" data-product-id="<%= item.productId %>">
+                                    <td class="product-cell">
+                                        <img src="<%= item.image %>" alt="<%= item.name %>" class="cart-item-image"
+                                            onerror="this.src='https://placehold.co/80x80/f1f5f9/475569?text=Product'">
+                                        <div class="cart-item-info">
+                                            <a href="/products/<%= item.productId %>" class="cart-item-name">
+                                                <%= item.name %>
+                                            </a>
+                                            <span class="cart-item-sku">SKU: <%= item.sku %></span>
+                                        </div>
+                                    </td>
+                                    <td class="price-cell">
+                                        <%= formatCurrency(item.price) %>
+                                    </td>
+                                    <td class="quantity-cell">
+                                        <div class="quantity-control">
+                                            <button type="button" class="qty-btn"
+                                                onclick="updateQuantity(<%= item.productId %>, <%= item.quantity - 1 %>)">-</button>
+                                            <input type="number" value="<%= item.quantity %>" min="1"
+                                                max="<%= item.stock %>" class="qty-input"
+                                                onchange="updateQuantity(<%= item.productId %>, this.value)">
+                                            <button type="button" class="qty-btn"
+                                                onclick="updateQuantity(<%= item.productId %>, <%= item.quantity + 1 %>)">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="total-cell">
+                                        <%= formatCurrency(item.price * item.quantity) %>
+                                    </td>
+                                    <td class="action-cell">
+                                        <button type="button" class="btn-remove"
+                                            onclick="removeItem(<%= item.productId %>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+
+                    <div class="cart-actions">
+                        <a href="/products" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+                        </a>
+                        <button type="button" class="btn btn-outline" onclick="clearCart()">
+                            <i class="fas fa-trash"></i> Xóa giỏ hàng
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cart-summary">
+                    <h3>Tóm tắt đơn hàng</h3>
+                    <div class="summary-row">
+                        <span>Số sản phẩm:</span>
+                        <span>
+                            <%= cart.totalItems %>
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tạm tính:</span>
+                        <span>
+                            <%= formatCurrency(cart.subtotal) %>
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển:</span>
+                        <span class="shipping-note">Tính ở bước thanh toán</span>
+                    </div>
+                    <hr>
+                    <div class="summary-row total">
+                        <span>Tổng cộng:</span>
+                        <span>
+                            <%= formatCurrency(cart.subtotal) %>
+                        </span>
+                    </div>
+                    <a href="/checkout" class="btn btn-primary btn-lg btn-checkout">
+                        <i class="fas fa-lock"></i> Tiến hành thanh toán
+                    </a>
+                </div>
+            </div>
+            <% } else { %>
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Giỏ hàng trống</h2>
+                    <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                    <a href="/products" class="btn btn-primary btn-lg">Bắt đầu mua sắm</a>
+                </div>
+                <% } %>
+    </div>
+</div>
+
+<!-- Custom Confirm Modal -->
+<div id="confirmModal" class="confirm-modal-overlay" style="display: none;">
+    <div class="confirm-modal">
+        <div class="confirm-modal-header">
+            <i class="fas fa-leaf" style="color: #22c55e; margin-right: 8px;"></i>
+            <span>FreshCart</span>
+        </div>
+        <div class="confirm-modal-body" id="confirmMessage"></div>
+        <div class="confirm-modal-footer">
+            <button type="button" class="btn btn-primary btn-confirm-ok" id="confirmOk">OK</button>
+            <button type="button" class="btn btn-outline btn-confirm-cancel" id="confirmCancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .confirm-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .confirm-modal {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        min-width: 320px;
+        max-width: 90%;
+        animation: modalFadeIn 0.2s ease;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .confirm-modal-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        color: #1f2937;
+    }
+
+    .confirm-modal-body {
+        padding: 20px;
+        color: #4b5563;
+        font-size: 14px;
+    }
+
+    .confirm-modal-footer {
+        padding: 12px 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-confirm-ok {
+        padding: 8px 20px;
+        font-size: 14px;
+    }
+
+    .btn-confirm-cancel {
+        padding: 8px 20px;
+        font-size: 14px;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #374151;
+    }
+
+    .btn-confirm-cancel:hover {
+        background: #e5e7eb;
+    }
+</style>
+
+<script>
+    // Custom confirm dialog
+    function showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirmModal');
+            const msgEl = document.getElementById('confirmMessage');
+            const okBtn = document.getElementById('confirmOk');
+            const cancelBtn = document.getElementById('confirmCancel');
+
+            msgEl.textContent = message;
+            modal.style.display = 'flex';
+
+            function cleanup() {
+                modal.style.display = 'none';
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+            }
+
+            function onOk() { cleanup(); resolve(true); }
+            function onCancel() { cleanup(); resolve(false); }
+
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+        });
+    }
+
+    // Format currency helper
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'decimal',
+            minimumFractionDigits: 0
+        }).format(amount) + ' đ';
+    }
+
+    // Update cart summary display
+    function updateCartSummary(cart) {
+        const cartCount = document.querySelector('.cart-count');
+        if (cartCount) cartCount.textContent = cart.totalItems;
+
+        // Update summary section
+        const summaryRows = document.querySelectorAll('.cart-summary .summary-row span:last-child');
+        if (summaryRows.length >= 2) {
+            summaryRows[0].textContent = cart.totalItems;
+            summaryRows[1].textContent = formatCurrency(cart.subtotal);
+        }
+
+        // Update total
+        const totalRow = document.querySelector('.cart-summary .summary-row.total span:last-child');
+        if (totalRow) totalRow.textContent = formatCurrency(cart.subtotal);
+    }
+
+    // Show empty cart message
+    function showEmptyCart() {
+        const cartLayout = document.querySelector('.cart-layout');
+        if (cartLayout) {
+            cartLayout.outerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Giỏ hàng trống</h2>
+                    <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                    <a href="/products" class="btn btn-primary btn-lg">Bắt đầu mua sắm</a>
+                </div>
+            `;
+        }
+    }
+
+    async function updateQuantity(productId, quantity) {
+        if (quantity < 1) return removeItem(productId);
+
+        const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+        const qtyInput = row?.querySelector('.qty-input');
+        const originalValue = qtyInput?.value;
+
+        try {
+            const response = await fetch('/cart/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ productId, quantity: parseInt(quantity) })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Update quantity input
+                if (qtyInput) qtyInput.value = quantity;
+
+                // Find item in returned cart data
+                const item = data.cart.items.find(i => i.productId === productId);
+                if (item && row) {
+                    // Update item total
+                    const totalCell = row.querySelector('.total-cell');
+                    if (totalCell) totalCell.textContent = formatCurrency(item.price * item.quantity);
+
+                    // Update buttons with new quantity
+                    const minusBtn = row.querySelector('.qty-btn:first-child');
+                    const plusBtn = row.querySelector('.qty-btn:last-child');
+                    if (minusBtn) minusBtn.onclick = () => updateQuantity(productId, item.quantity - 1);
+                    if (plusBtn) plusBtn.onclick = () => updateQuantity(productId, item.quantity + 1);
+                }
+
+                // Update cart summary
+                updateCartSummary(data.cart);
+            } else {
+                alert(data.error || 'Có lỗi xảy ra');
+                if (qtyInput) qtyInput.value = originalValue;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
+            if (qtyInput) qtyInput.value = originalValue;
+        }
+    }
+
+    async function removeItem(productId) {
+        const confirmed = await showConfirm('Bạn có chắc muốn xóa sản phẩm này?');
+        if (!confirmed) return;
+
+        const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+
+        try {
+            // Add fade out effect immediately
+            if (row) {
+                row.style.transition = 'opacity 0.3s ease';
+                row.style.opacity = '0.5';
+            }
+
+            const response = await fetch('/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Remove row with animation
+                if (row) {
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+
+                        // Check if cart is now empty
+                        const remainingItems = document.querySelectorAll('.cart-item');
+                        if (remainingItems.length === 0) {
+                            showEmptyCart();
+                        } else {
+                            updateCartSummary(data.cart);
+                        }
+                    }, 300);
+                }
+
+                // Update header cart count
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) cartCount.textContent = data.cart.totalItems;
+            } else {
+                // Restore row on error
+                if (row) row.style.opacity = '1';
+                alert(data.error || 'Có lỗi xảy ra');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (row) row.style.opacity = '1';
+            alert('Có lỗi xảy ra khi xóa sản phẩm');
+        }
+    }
+
+    async function clearCart() {
+        const confirmed = await showConfirm('Bạn có chắc muốn xóa tất cả sản phẩm?');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/cart/clear', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
+            if (data.success) {
+                showEmptyCart();
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) cartCount.textContent = '0';
+            } else {
+                alert(data.error || 'Có lỗi xảy ra');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa giỏ hàng');
+        }
+    }
+</script>

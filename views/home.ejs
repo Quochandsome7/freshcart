@@ -1,0 +1,113 @@
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Thực phẩm <span class="highlight">Hữu cơ</span> Tươi mới mỗi ngày</h1>
+            <p class="hero-subtitle">Sản phẩm chất lượng cao, an toàn cho sức khỏe gia đình bạn</p>
+            <a href="/products" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-basket"></i> Mua sắm ngay
+            </a>
+        </div>
+        <div class="hero-image">
+            <img src="https://medicaljb.com/wp-content/uploads/2021/01/thuc-pham-huu-co-la-gi.jpg" alt="Rau củ tươi"
+                onerror="this.src='https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=600&h=500&fit=crop&q=80'"
+                style="border-radius: 16px; object-fit: cover;">
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3>Giao hàng nhanh</h3>
+                <p>Giao hàng trong 24h với đơn hàng nội thành</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌱</div>
+                <h3>100% Hữu cơ</h3>
+                <p>Sản phẩm được chứng nhận hữu cơ</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💳</div>
+                <h3>Thanh toán an toàn</h3>
+                <p>Hỗ trợ VNPAY, MoMo & thanh toán COD</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Đổi trả dễ dàng</h3>
+                <p>Đổi trả trong 7 ngày nếu không hài lòng</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="section categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Danh mục sản phẩm</h2>
+            <a href="/products" class="section-link">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="categories-grid">
+            <% categories.forEach(category=> { %>
+                <a href="/products/category/<%= category.id %>" class="category-card">
+                    <div class="category-image">
+                        <img src="<%= category.image || '/images/category-placeholder.jpg' %>"
+                            alt="<%= category.name %>"
+                            onerror="this.src='https://placehold.co/200x200/e2e8f0/475569?text=<%= category.name %>'">
+                    </div>
+                    <h3 class="category-name">
+                        <%= category.name %>
+                    </h3>
+                </a>
+                <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Sản phẩm nổi bật</h2>
+            <a href="/products" class="section-link">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="products-grid">
+            <% featuredProducts.forEach(product=> { %>
+                <%- include('partials/product-card', { product }) %>
+                    <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- New Products -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Sản phẩm mới</h2>
+            <a href="/products?sort=newest" class="section-link">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="products-grid">
+            <% newProducts.forEach(product=> { %>
+                <%- include('partials/product-card', { product }) %>
+                    <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Nhận ưu đãi 10% cho đơn hàng đầu tiên</h2>
+            <p>Đăng ký ngay để nhận thông tin ưu đãi mới nhất</p>
+            <form class="cta-form">
+                <input type="email" placeholder="Nhập email của bạn" class="cta-input">
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+            </form>
+        </div>
+    </div>
+</section>
