@@ -31,7 +31,9 @@ try {
         db: sequelize,
         tableName: 'sessions',
         checkExpirationInterval: 15 * 60 * 1000,
-        expiration: 24 * 60 * 60 * 1000
+        expiration: 24 * 60 * 60 * 1000,
+        modelKey: 'Session',
+        timestamps: false
     });
 
     // Trust proxy for Vercel/production
@@ -169,7 +171,7 @@ try {
         } catch (e) {
             results.ejsRenderError = e.message;
         }
-        // Test layout rendering
+        // Test layout rendering (callback mode - does NOT send response)
         try {
             await new Promise((resolve, reject) => {
                 res.render('errors/404', { title: 'Test', message: 'Test' }, (err, html) => {
@@ -186,7 +188,9 @@ try {
         } catch (e) {
             // Error already captured above
         }
-        res.json(results);
+        if (!res.headersSent) {
+            res.json(results);
+        }
     });
 
     // Routes
@@ -219,6 +223,9 @@ try {
     // Error handler
     app.use((err, req, res, next) => {
         console.error('Server error:', err);
+        if (res.headersSent) {
+            return next(err);
+        }
         try {
             res.status(500).render('errors/500', {
                 title: 'Lỗi máy chủ',
@@ -226,7 +233,9 @@ try {
             });
         } catch (renderErr) {
             console.error('Render error:', renderErr);
-            res.status(500).json({ error: err.message });
+            if (!res.headersSent) {
+                res.status(500).json({ error: err.message });
+            }
         }
     });
 
