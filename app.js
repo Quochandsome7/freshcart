@@ -142,6 +142,45 @@ try {
         res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV });
     });
 
+    // Session test endpoint
+    app.get('/session-test', async (req, res) => {
+        const results = { timestamp: new Date().toISOString() };
+        try {
+            // Check if Session model exists
+            results.modelExists = !!sequelize.models.Session;
+            results.modelTimestamps = sequelize.models.Session?.options?.timestamps;
+            results.modelTableName = sequelize.models.Session?.getTableName?.();
+            results.modelAttributes = Object.keys(sequelize.models.Session?.rawAttributes || {});
+        } catch (e) {
+            results.modelError = e.message;
+        }
+        try {
+            // Test a raw query on the sessions table
+            const [tableInfo] = await sequelize.query("DESCRIBE sessions");
+            results.tableColumns = tableInfo.map(c => c.Field);
+        } catch (e) {
+            results.tableError = e.message;
+        }
+        try {
+            // Test session store get
+            await new Promise((resolve, reject) => {
+                sessionStore.get('test-sid', (err, session) => {
+                    if (err) {
+                        results.storeGetError = err.message;
+                        results.storeGetSql = err.sql || err.parent?.sql;
+                        reject(err);
+                    } else {
+                        results.storeGetOk = true;
+                        resolve(session);
+                    }
+                });
+            });
+        } catch (e) {
+            // Error already captured
+        }
+        res.json(results);
+    });
+
     // Debug endpoint to test DB and rendering
     app.get('/debug', async (req, res) => {
         const fs = require('fs');
