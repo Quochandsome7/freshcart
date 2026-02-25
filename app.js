@@ -71,6 +71,9 @@ try {
     // Sync session table (handle async error)
     sessionStore.sync().catch(err => console.error('Session store sync error:', err));
 
+    // Sync all database tables (creates missing tables like users, products, etc.)
+    syncDatabase(false).catch(err => console.error('Database sync error:', err));
+
     // View engine setup
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, 'views'));
