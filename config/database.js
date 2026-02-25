@@ -3,11 +3,19 @@ require('dotenv').config();
 
 let sequelize;
 
-// 👉 Nếu có Railway URL thì dùng URL
-if (process.env.MYSQL_URL) {
-    console.log("🚄 Using Railway MySQL");
+// Support Railway env var names (MYSQLHOST, MYSQLDATABASE, etc.)
+// as well as custom names (DB_HOST, DB_NAME, etc.) and MYSQL_URL
+const dbHost = process.env.MYSQLHOST || process.env.DB_HOST;
+const dbPort = process.env.MYSQLPORT || process.env.DB_PORT;
+const dbName = process.env.MYSQLDATABASE || process.env.DB_NAME;
+const dbUser = process.env.MYSQLUSER || process.env.DB_USER;
+const dbPassword = process.env.MYSQLPASSWORD || process.env.DB_PASSWORD;
+const mysqlUrl = process.env.MYSQL_URL;
 
-    sequelize = new Sequelize(process.env.MYSQL_URL, {
+if (mysqlUrl) {
+    console.log("🚄 Using MYSQL_URL");
+
+    sequelize = new Sequelize(mysqlUrl, {
         dialect: 'mysql',
         logging: false,
         dialectOptions: {
@@ -18,20 +26,25 @@ if (process.env.MYSQL_URL) {
         }
     });
 
-} else {
-    console.log("💻 Using Local MySQL");
+} else if (dbHost) {
+    console.log("🚄 Using MySQL:", dbHost + ":" + dbPort);
 
-    sequelize = new Sequelize(
-        process.env.DB_NAME,
-        process.env.DB_USER,
-        process.env.DB_PASSWORD,
-        {
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            dialect: 'mysql',
-            logging: process.env.NODE_ENV === 'development' ? console.log : false
-        }
-    );
+    sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+        host: dbHost,
+        port: dbPort,
+        dialect: 'mysql',
+        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        dialectOptions: process.env.NODE_ENV === 'production' ? {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
+            }
+        } : {}
+    });
+
+} else {
+    console.error("❌ No database configuration found!");
+    process.exit(1);
 }
 
 // Test connection
