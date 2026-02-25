@@ -247,6 +247,60 @@ try {
         }
     });
 
+    // Seed endpoint - creates default users if none exist
+    app.get('/seed', async (req, res) => {
+        try {
+            const { User } = require('./models');
+            const bcrypt = require('bcryptjs');
+
+            const userCount = await User.count();
+            if (userCount > 0) {
+                return res.json({ message: 'Database already has ' + userCount + ' users. Seed skipped.' });
+            }
+
+            const adminPassword = await bcrypt.hash('admin123', 10);
+            await User.create({
+                email: 'admin@freshcart.vn',
+                password: adminPassword,
+                fullName: 'Admin FreshCart',
+                phone: '0123456789',
+                role: 'admin',
+                address: 'Hà Nội, Việt Nam'
+            }, { hooks: false });
+
+            const managerPassword = await bcrypt.hash('manager123', 10);
+            await User.create({
+                email: 'manager@freshcart.vn',
+                password: managerPassword,
+                fullName: 'Inventory Manager',
+                phone: '0987654321',
+                role: 'inventory_manager',
+                address: 'TP. Hồ Chí Minh, Việt Nam'
+            }, { hooks: false });
+
+            const customerPassword = await bcrypt.hash('customer123', 10);
+            await User.create({
+                email: 'customer@example.com',
+                password: customerPassword,
+                fullName: 'Nguyễn Văn A',
+                phone: '0912345678',
+                role: 'customer',
+                address: '123 Đường ABC, Quận 1, TP.HCM'
+            }, { hooks: false });
+
+            res.json({
+                message: 'Seed completed!',
+                accounts: [
+                    { email: 'admin@freshcart.vn', password: 'admin123', role: 'admin' },
+                    { email: 'manager@freshcart.vn', password: 'manager123', role: 'inventory_manager' },
+                    { email: 'customer@example.com', password: 'customer123', role: 'customer' }
+                ]
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
     // Routes
     const indexRoutes = require('./routes/index');
     const productRoutes = require('./routes/products');
