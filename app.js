@@ -40,8 +40,8 @@ app.use(session({
     }
 }));
 
-// Create session table
-sessionStore.sync();
+// Create session table (handle async error to prevent crash on Vercel)
+sessionStore.sync().catch(err => console.error('Session store sync error:', err));
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -109,6 +109,11 @@ app.locals.getPaymentStatusText = (status) => {
     return statusMap[status] || status;
 };
 
+// Health check endpoint (no DB required)
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV });
+});
+
 // Routes
 const indexRoutes = require('./routes/index');
 const productRoutes = require('./routes/products');
@@ -139,10 +144,15 @@ app.use((req, res, next) => {
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Server error:', err);
-    res.status(500).render('errors/500', {
-        title: 'Lỗi máy chủ',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Đã xảy ra lỗi. Vui lòng thử lại sau.'
-    });
+    try {
+        res.status(500).render('errors/500', {
+            title: 'Lỗi máy chủ',
+            message: process.env.NODE_ENV === 'development' ? err.message : 'Đã xảy ra lỗi. Vui lòng thử lại sau.'
+        });
+    } catch (renderErr) {
+        console.error('Render error:', renderErr);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Start server
