@@ -14,6 +14,9 @@ try {
     const path = require('path');
     const session = require('express-session');
     const expressLayouts = require('express-ejs-layouts');
+    // Explicitly require mysql2 so Vercel's bundler includes it
+    // (Sequelize dynamically requires it, which Vercel can't detect)
+    require('mysql2');
     const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
     // Initialize express app
