@@ -18,6 +18,9 @@ if (mysqlUrl) {
     sequelize = new Sequelize(mysqlUrl, {
         dialect: 'mysql',
         logging: false,
+        define: {
+            underscored: true
+        },
         dialectOptions: {
             ssl: {
                 require: true,
@@ -34,6 +37,9 @@ if (mysqlUrl) {
         port: dbPort,
         dialect: 'mysql',
         logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        define: {
+            underscored: true
+        },
         dialectOptions: process.env.NODE_ENV === 'production' ? {
             ssl: {
                 require: true,
