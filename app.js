@@ -20,6 +20,9 @@ const sessionStore = new SequelizeStore({
     expiration: 24 * 60 * 60 * 1000 // Session expires in 24 hours
 });
 
+// Trust proxy for Vercel/production (needed for secure cookies behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -174,6 +177,9 @@ const startServer = async () => {
     }
 };
 
-startServer();
+// Only start server locally, Vercel handles this via serverless functions
+if (!process.env.VERCEL) {
+    startServer();
+}
 
 module.exports = app;
