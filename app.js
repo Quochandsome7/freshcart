@@ -130,7 +130,20 @@ try {
 
     // Debug endpoint to test DB and rendering
     app.get('/debug', async (req, res) => {
-        const results = { dbConnection: false, dbQuery: false, render: false };
+        const fs = require('fs');
+        const results = { dbConnection: false, dbQuery: false };
+        results.__dirname = __dirname;
+        results.viewsPath = path.join(__dirname, 'views');
+        results.viewsExists = fs.existsSync(path.join(__dirname, 'views'));
+        results.layoutExists = fs.existsSync(path.join(__dirname, 'views', 'layouts', 'main.ejs'));
+        results.homeExists = fs.existsSync(path.join(__dirname, 'views', 'home.ejs'));
+        results.error404Exists = fs.existsSync(path.join(__dirname, 'views', 'errors', '404.ejs'));
+        try {
+            const viewFiles = fs.readdirSync(path.join(__dirname, 'views'));
+            results.viewFiles = viewFiles;
+        } catch (e) {
+            results.viewFilesError = e.message;
+        }
         try {
             await sequelize.authenticate();
             results.dbConnection = true;
@@ -145,11 +158,35 @@ try {
         } catch (e) {
             results.dbQueryError = e.message;
         }
+        // Test EJS rendering
         try {
-            res.json(results);
+            const ejs = require('ejs');
+            const rendered = await ejs.renderFile(path.join(__dirname, 'views', 'errors', '404.ejs'), {
+                title: 'Test', message: 'Test'
+            });
+            results.ejsRender = true;
+            results.ejsLength = rendered.length;
         } catch (e) {
-            res.json({ ...results, renderError: e.message });
+            results.ejsRenderError = e.message;
         }
+        // Test layout rendering
+        try {
+            await new Promise((resolve, reject) => {
+                res.render('errors/404', { title: 'Test', message: 'Test' }, (err, html) => {
+                    if (err) {
+                        results.layoutRenderError = err.message;
+                        reject(err);
+                    } else {
+                        results.layoutRender = true;
+                        results.htmlLength = html.length;
+                        resolve(html);
+                    }
+                });
+            });
+        } catch (e) {
+            // Error already captured above
+        }
+        res.json(results);
     });
 
     // Routes
