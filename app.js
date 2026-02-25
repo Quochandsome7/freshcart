@@ -18,6 +18,7 @@ try {
     // (Sequelize dynamically requires it, which Vercel can't detect)
     require('mysql2');
     const SequelizeStore = require('connect-session-sequelize')(session.Store);
+    const { DataTypes } = require('sequelize');
 
     // Initialize express app
     app = express();
@@ -26,14 +27,25 @@ try {
     const { sequelize, testConnection } = require('./config/database');
     const { syncDatabase } = require('./models');
 
-    // Create session store
+    // Define Session model explicitly to disable timestamps
+    const SessionModel = sequelize.define('Session', {
+        sid: {
+            type: DataTypes.STRING(36),
+            primaryKey: true
+        },
+        expires: DataTypes.DATE,
+        data: DataTypes.TEXT
+    }, {
+        tableName: 'sessions',
+        timestamps: false
+    });
+
+    // Create session store using the explicit model
     const sessionStore = new SequelizeStore({
         db: sequelize,
-        tableName: 'sessions',
+        table: 'Session',
         checkExpirationInterval: 15 * 60 * 1000,
-        expiration: 24 * 60 * 60 * 1000,
-        modelKey: 'Session',
-        timestamps: false
+        expiration: 24 * 60 * 60 * 1000
     });
 
     // Trust proxy for Vercel/production
@@ -56,7 +68,7 @@ try {
         }
     }));
 
-    // Create session table (handle async error)
+    // Sync session table (handle async error)
     sessionStore.sync().catch(err => console.error('Session store sync error:', err));
 
     // View engine setup
