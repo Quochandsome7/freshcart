@@ -128,6 +128,30 @@ try {
         res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV });
     });
 
+    // Debug endpoint to test DB and rendering
+    app.get('/debug', async (req, res) => {
+        const results = { dbConnection: false, dbQuery: false, render: false };
+        try {
+            await sequelize.authenticate();
+            results.dbConnection = true;
+        } catch (e) {
+            results.dbConnectionError = e.message;
+        }
+        try {
+            const { Product } = require('./models');
+            const count = await Product.count();
+            results.dbQuery = true;
+            results.productCount = count;
+        } catch (e) {
+            results.dbQueryError = e.message;
+        }
+        try {
+            res.json(results);
+        } catch (e) {
+            res.json({ ...results, renderError: e.message });
+        }
+    });
+
     // Routes
     const indexRoutes = require('./routes/index');
     const productRoutes = require('./routes/products');
