@@ -336,6 +336,46 @@ try {
         }
     });
 
+    // Fix admin - forcefully create/update admin account
+    app.get('/fix-admin', async (req, res) => {
+        try {
+            const { User } = require('./models');
+            const bcrypt = require('bcryptjs');
+
+            // List all existing users first
+            const allUsers = await User.findAll({ attributes: ['id', 'email', 'role', 'isActive', 'createdAt'] });
+
+            // Upsert admin account
+            const adminPassword = await bcrypt.hash('admin123', 10);
+            const [admin, created] = await User.findOrCreate({
+                where: { email: 'admin@freshcart.vn' },
+                defaults: {
+                    email: 'admin@freshcart.vn',
+                    password: adminPassword,
+                    fullName: 'Admin FreshCart',
+                    phone: '0123456789',
+                    role: 'admin',
+                    isActive: true,
+                    address: 'Hà Nội, Việt Nam'
+                },
+                hooks: false
+            });
+
+            if (!created) {
+                // Update existing admin's password
+                await admin.update({ password: adminPassword, role: 'admin', isActive: true }, { hooks: false });
+            }
+
+            res.json({
+                existingUsersBefore: allUsers.map(u => ({ id: u.id, email: u.email, role: u.role, isActive: u.isActive })),
+                adminAction: created ? 'CREATED' : 'PASSWORD RESET',
+                loginWith: { email: 'admin@freshcart.vn', password: 'admin123' }
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
     // Routes
     const indexRoutes = require('./routes/index');
     const productRoutes = require('./routes/products');
