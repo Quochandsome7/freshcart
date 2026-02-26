@@ -57,6 +57,7 @@ try {
     app.use(express.static(path.join(__dirname, 'public')));
 
     // Session configuration
+    const isProduction = process.env.NODE_ENV === 'production';
     app.use(session({
         secret: process.env.SESSION_SECRET || 'freshcart_secret_key',
         store: sessionStore,
@@ -64,8 +65,10 @@ try {
         saveUninitialized: false,
         proxy: true,
         cookie: {
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: isProduction,
+            // 'none' is required when secure=true (production/Vercel) so cookies
+            // are sent correctly through Vercel's reverse proxy (cross-origin)
+            sameSite: isProduction ? 'none' : 'lax',
             maxAge: 24 * 60 * 60 * 1000
         }
     }));
