@@ -12,13 +12,10 @@ try {
     require('dotenv').config();
     const express = require('express');
     const path = require('path');
-    const session = require('express-session');
+    const cookieSession = require('cookie-session');
     const expressLayouts = require('express-ejs-layouts');
     // Explicitly require mysql2 so Vercel's bundler includes it
-    // (Sequelize dynamically requires it, which Vercel can't detect)
     require('mysql2');
-    const SequelizeStore = require('connect-session-sequelize')(session.Store);
-    const { DataTypes } = require('sequelize');
 
     // Initialize express app
     app = express();
@@ -26,27 +23,6 @@ try {
     // Database
     const { sequelize, testConnection } = require('./config/database');
     const { syncDatabase } = require('./models');
-
-    // Define Session model explicitly to disable timestamps
-    const SessionModel = sequelize.define('Session', {
-        sid: {
-            type: DataTypes.STRING(36),
-            primaryKey: true
-        },
-        expires: DataTypes.DATE,
-        data: DataTypes.TEXT
-    }, {
-        tableName: 'sessions',
-        timestamps: false
-    });
-
-    // Create session store using the explicit model
-    const sessionStore = new SequelizeStore({
-        db: sequelize,
-        table: 'Session',
-        checkExpirationInterval: 15 * 60 * 1000,
-        expiration: 24 * 60 * 60 * 1000
-    });
 
     // Trust proxy for Vercel/production
     app.set('trust proxy', 1);
@@ -56,29 +32,37 @@ try {
     app.use(express.urlencoded({ extended: true }));
     app.use(express.static(path.join(__dirname, 'public')));
 
-    // Session configuration
+    // Cookie-session: stores session data directly in encrypted cookie
+    // No database needed - works reliably on Vercel serverless
     const isProduction = process.env.NODE_ENV === 'production';
-    app.use(session({
-        secret: process.env.SESSION_SECRET || 'freshcart_secret_key',
-        store: sessionStore,
-        resave: true,           // Always save session (needed for Vercel serverless)
-        saveUninitialized: false,
-        proxy: true,
-        name: 'freshcart.sid',
-        cookie: {
-            secure: isProduction,
-            // 'none' is required when secure=true (production/Vercel) so cookies
-            // are sent correctly through Vercel's reverse proxy (cross-origin)
-            sameSite: isProduction ? 'none' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000,
-            httpOnly: true
-        }
+    app.use(cookieSession({
+        name: 'freshcart.session',
+        keys: [
+            process.env.SESSION_SECRET || 'freshcart_secret_key_1',
+            process.env.SESSION_SECRET_2 || 'freshcart_secret_key_2'
+        ],
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        httpOnly: true
     }));
 
-    // Sync session table (handle async error)
-    sessionStore.sync().catch(err => console.error('Session store sync error:', err));
+    // Patch cookie-session to support req.session.save() and req.session.destroy()
+    // (express-session API compatibility)
+    app.use((req, res, next) => {
+        if (req.session && !req.session.save) {
+            req.session.save = (cb) => { if (cb) cb(); };
+        }
+        if (req.session && !req.session.destroy) {
+            req.session.destroy = (cb) => {
+                req.session = null;
+                if (cb) cb();
+            };
+        }
+        next();
+    });
 
-    // Sync all database tables (creates missing tables like users, products, etc.)
+    // Sync all database tables
     syncDatabase(false).catch(err => console.error('Database sync error:', err));
 
     // View engine setup
