@@ -61,15 +61,17 @@ try {
     app.use(session({
         secret: process.env.SESSION_SECRET || 'freshcart_secret_key',
         store: sessionStore,
-        resave: false,
+        resave: true,           // Always save session (needed for Vercel serverless)
         saveUninitialized: false,
         proxy: true,
+        name: 'freshcart.sid',
         cookie: {
             secure: isProduction,
             // 'none' is required when secure=true (production/Vercel) so cookies
             // are sent correctly through Vercel's reverse proxy (cross-origin)
             sameSite: isProduction ? 'none' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000
+            maxAge: 24 * 60 * 60 * 1000,
+            httpOnly: true
         }
     }));
 
@@ -148,6 +150,50 @@ try {
     // Health check endpoint (no DB required)
     app.get('/health', (req, res) => {
         res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV });
+    });
+
+    // Quick env check
+    app.get('/env-check', (req, res) => {
+        res.json({
+            NODE_ENV: process.env.NODE_ENV,
+            hasDbHost: !!(process.env.MYSQLHOST || process.env.DB_HOST),
+            hasDbName: !!(process.env.MYSQLDATABASE || process.env.DB_NAME),
+            hasDbUser: !!(process.env.MYSQLUSER || process.env.DB_USER),
+            hasDbPass: !!(process.env.MYSQLPASSWORD || process.env.DB_PASSWORD),
+            hasMysqlUrl: !!process.env.MYSQL_URL,
+            hasSessionSecret: !!process.env.SESSION_SECRET,
+            hasVercel: !!process.env.VERCEL,
+            sessionCookieConfig: {
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+            }
+        });
+    });
+
+    // Login test endpoint - tests DB + password directly (no session involved)
+    app.post('/login-test', async (req, res) => {
+        try {
+            const { email, password } = req.body;
+            if (!email || !password) {
+                return res.json({ ok: false, error: 'Missing email or password' });
+            }
+            const { User } = require('./models');
+            const bcrypt = require('bcryptjs');
+            const user = await User.findOne({ where: { email } });
+            if (!user) {
+                return res.json({ ok: false, error: 'User not found', email });
+            }
+            const passwordMatch = await bcrypt.compare(password, user.password);
+            return res.json({
+                ok: true,
+                passwordMatch,
+                userId: user.id,
+                role: user.role,
+                isActive: user.isActive
+            });
+        } catch (error) {
+            return res.status(500).json({ ok: false, error: error.message });
+        }
     });
 
     // Session test endpoint
